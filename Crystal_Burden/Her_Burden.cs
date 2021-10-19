@@ -19,7 +19,7 @@ using RoR2.ContentManagement;
 
 [module: UnverifiableCode]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
-//
+
 namespace Crystal_Burden
 {
     [BepInDependency("com.xoxfaby.BetterAPI", BepInDependency.DependencyFlags.HardDependency)]
