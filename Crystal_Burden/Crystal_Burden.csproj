@@ -97,6 +97,7 @@
     <Compile Include="SizeScripts\BodySizeScript.cs" />
     <Compile Include="SizeScripts\PrefabSizeScript.cs" />
     <Compile Include="SizeScripts\SizeHandoffManager.cs" />
+    <Compile Include="ConfigChanges.cs" />
     <Compile Include="SoftDependencies.cs" />
   </ItemGroup>
   <ItemGroup />

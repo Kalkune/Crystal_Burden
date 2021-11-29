@@ -113,9 +113,15 @@ namespace Crystal_Burden
             {
                 GameObject followerPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>(Hbiiv.Value + "her_burden");
                 if (Hbvos.Value == "Burden")
+                {
                     followerPrefab.AddComponent<PrefabSizeScript>();
-                if (Hbvos.Value != "Burden")
+                    followerPrefab.transform.Find("DildoTrail").gameObject.SetActive(Hbptv.Value);
+                }
+                else
+                {
                     followerPrefab.AddComponent<FakeBurdenPrefabSizeScript>();
+                    followerPrefab.transform.Find("DildoTrail").gameObject.SetActive(false);
+                }
                 Vector3 generalScale = new Vector3(.0125f, .0125f, .0125f);
                 rules.AddCharacterModelRule(new ItemDisplayRule
                 {
@@ -192,7 +198,7 @@ namespace Crystal_Burden
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
                     childName = "Pelvis",
-                    localPos = new Vector3(0f, 0.2f, 0.2f),
+                    localPos = new Vector3(0f, 0.25f, 0.15f),
                     localAngles = new Vector3(180f, -0.05f, 0f),
                     localScale = generalScale
                 }, "mdlLoader"

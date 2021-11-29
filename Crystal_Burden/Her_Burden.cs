@@ -24,7 +24,7 @@ namespace Crystal_Burden
 {
     [BepInDependency("com.xoxfaby.BetterAPI", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("com.OkIgotIt.Her_Burden", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.Kalkune.Crystal_Burden", "Crystal_Burden", "1.5.0")]
+    [BepInPlugin("com.Kalkune.Crystal_Burden", "Crystal_Burden", "1.5.1")]
 
     public class Crystal_Burden : BaseUnityPlugin
     {
@@ -52,6 +52,8 @@ namespace Crystal_Burden
         public static ConfigEntry<bool> Hbvst { get; set; }
         public static ConfigEntry<bool> Hbvsm { get; set; }
         public static ConfigEntry<bool> Hbnsfw { get; set; }
+        public static ConfigEntry<bool> Hblvf { get; set; }
+        public static ConfigEntry<bool> Hbptv { get; set; }
         public static ConfigEntry<string> Hbiiv { get; set; }
         public static ConfigEntry<string> Hbvos { get; set; }
         public static ConfigEntry<float> Hbims { get; set; }
@@ -65,22 +67,26 @@ namespace Crystal_Burden
         {
             SoftDependencies.Init();
             Hbisos = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Item Visibility", true, "Changes if Her Burden Variants shows on the Survivor");
-            Hbpul = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Luck Effect", false, "Changes if luck effects chance to pickup Her Burden Variants once you have one");
+            Hbpul = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Luck Effect", true, "Changes if luck effects chance to pickup Her Burden Variants once you have one");
             Hbgoi = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Give Original Item", false, "Changes if you also get the original item along with a Her Burden Variant");
             Hbdbt = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Debuffs", true, "Changes if debuffs are applied or not, if disabled, Her Burden Variants changes to legendary and makes it have a chance to drop on kill");
             Hbvst = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Variant Drop Count", true, "Changes if all Her Burden Variants are in the drop list or just Her Burden, if disabled, only Her Burden is in the drop list");
-            Hbvsm = Config.Bind<bool>("2. Her Burden Toggle", "Toggle Variants Affect Size", false, "Changes if other Her Burden Variants increase item display size");
-            if (HerBurdenInstalled)
+            Hbvsm = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Variants Affect Size", false, "Changes if other Her Burden Variants increase item display size");
+            Hblvf = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Luck Inverse Effect", true, "Changes if luck is inverted for the Toggle Luck Effect config, if enabled, luck will be inverted");
+            if (HerBurdenInstalled || File.ReadAllText(Paths.ConfigPath + "\\com.Kalkune.Crystal_Burden.cfg").Contains("[0. Her Burden NSFW Toggle]"))
+            {
                 Hbnsfw = Config.Bind<bool>("0. Her Burden NSFW Toggle", "Toggles Her Burden NSFW", true, "Changes if Her Burden is NSFW or SFW, if disabled, Her Burden will switch to SFW models");
-            Hbiiv = Config.Bind<string>("2. Her Burden General", "Artist", "Hush", "Decides what artist to use, \"Hush\" or \"aka6\".");
-            Hbvos = Config.Bind<string>("2. Her Burden General", "Variant Size Increase", "Burden", "Changes what Variant gets its size increased, \"Burden\" \"Recluse\" \"Fury\" \"Torpor\" \"Rancor\" \"Panic\".");
+                Hbptv = Config.Bind<bool>("2. Her Burden Toggle", "Toggle Particle Trail", false, "Changes if the particle trail is visable or not");
+                Hbiiv = Config.Bind<string>("2. Her Burden General", "Artist", "Hush", new ConfigDescription("Decides what artist to use", new AcceptableValueList<string>("Hush", "aka6")));
+            }
+            Hbvos = Config.Bind<string>("1. Her Burden General", "Variant Size Increase", "Burden", new ConfigDescription("Changes what Variant gets its size increased", new AcceptableValueList<string>("Burden", "Recluse", "Fury", "Torpor", "Rancor", "Panic")));
             Hbims = Config.Bind<float>("1. Her Burden Size", "Max size of Variant", 2, "Changes the max size of the item on the Survivor");
             Hbism = Config.Bind<float>("1. Her Burden Size", "Size Multiplier for Variant", 20, "Changes how many Variants are required to get to the max size");
             Hbcpu = Config.Bind<int>("1. Her Burden Mechanics", "Chance to change pickup to Her Burden Variants", 100, "Chance to change other items to Her Burden Variants on pickup once you have one");
             Hbedc = Config.Bind<int>("1. Her Burden Mechanics", "Chance for enemies to drop Her Burden Variants", 5, "Chance for enemies top drop Her Burden Variants once you have one");
             Hbbuff = Config.Bind<float>("1. Her Burden Mechanics", "Buff", 1.05f, "Changes the increase of buff of the item per item exponentially");
             Hbdebuff = Config.Bind<float>("1. Her Burden Mechanics", "Debuff", 0.975f, "Changes the decrease of debuff of the item per item exponentially");
-            Hbversion = Config.Bind<string>("Dev. Development Config", "Version", "1.5.0", "I don't recommend changing this value");
+            Hbversion = Config.Bind<string>("Dev. Development Config", "Version", "1.5.1", "I don't recommend changing this value");
             Hbbv = (float)Math.Round((Hbbuff.Value - 1f) * 100f, 2);
             Hbdbv = (float)Math.Round(Math.Abs((Hbdebuff.Value - 1f) * 100f), 2);
             using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Crystal_Burden.Resources.herburden"))
@@ -88,11 +94,7 @@ namespace Crystal_Burden
                 bundle = AssetBundle.LoadFromStream(stream);
             }
 
-            if (Hbvos.Value != "Burden" && Hbvos.Value != "Recluse" && Hbvos.Value != "Fury" && Hbvos.Value != "Torpor" && Hbvos.Value != "Rancor" && Hbvos.Value != "Panic")
-                Hbvos.Value = "Burden";
-            if (Hbiiv.Value != "Hush" && Hbiiv.Value != "aka6")
-                Hbiiv.Value = "Hush";
-
+            ConfigChanges.Init();
             MiscItems.Init();
             HerBurdenItem.Init();
             HerRecluseItem.Init();
@@ -118,82 +120,76 @@ namespace Crystal_Burden
                 {
                     orig(self, body, inventory);
 
-
                     //Handle the size change with scripts
                     Size(1, body, false);
                     Size(2, body, false);
                     return;
                 }
-                if (Hbvst.Value && Hbdbt.Value)
+
+                if (Hbdbt.Value)
                 {
+                    int TotalDrops;
+                    float DropChance = Hbcpu.Value;
+                    CharacterMaster cmluck = new CharacterMaster();
+                    cmluck.luck = inventory.GetComponent<CharacterMaster>().luck;
+                    if (Hbpul.Value)
+                    {
+                        if (Hblvf.Value)
+                            cmluck.luck = -cmluck.luck;
+                        DropChance += cmluck.luck;
+                    }
+                    for (TotalDrops = 0; DropChance > 100; TotalDrops++)
+                        DropChance -= 100;
+
                     bool changepickup = false;
                     if (inventory.GetItemCount(HerBurden.itemIndex) > 0 || inventory.GetItemCount(HerRecluse.itemIndex) > 0 || inventory.GetItemCount(HerFury.itemIndex) > 0 || inventory.GetItemCount(HerTorpor.itemIndex) > 0 || inventory.GetItemCount(HerRancor.itemIndex) > 0 || inventory.GetItemCount(HerPanic.itemIndex) > 0)
                         changepickup = true;
                     bool blacklist = false;
                     if (self.pickupIndex == PickupCatalog.FindPickupIndex(HerBurden.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(HerRecluse.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(HerFury.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(HerTorpor.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(HerRancor.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(HerPanic.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ScrapWhite.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ScrapGreen.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ScrapRed.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ScrapYellow.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ArtifactKey.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.LunarTrinket.itemIndex))
                         blacklist = true;
-                    if (blacklist == false && Hbgoi.Value == true)
+                    if (!blacklist && Hbgoi.Value)
                         if (self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.Pearl.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ShinyPearl.itemIndex))
                             blacklist = true;
 
-                    bool CheckRollTrue;
-                    if (Hbpul.Value == true)
-                        CheckRollTrue = Util.CheckRoll(Hbcpu.Value, inventory.GetComponent<CharacterMaster>());
-                    else
-                        CheckRollTrue = Util.CheckRoll(Hbcpu.Value);
-
-                    if (changepickup == true && CheckRollTrue == true && blacklist == false && Hbgoi.Value == true)
-                        orig(self, body, inventory);
-                    if (changepickup == true && CheckRollTrue == true && blacklist == false)
+                    if (Util.CheckRoll(DropChance))
+                        TotalDrops++;
+                    if (changepickup == true && TotalDrops > 0 && blacklist == false)
                     {
-                        switch (Mathf.FloorToInt(UnityRandom.Range(0, 6)))
+                        if (Hbgoi.Value)
+                            orig(self, body, inventory);
+                        for (int x = TotalDrops; x > 0; x--)
                         {
-                            case 0:
-                                self.pickupIndex = PickupCatalog.FindPickupIndex(HerBurden.itemIndex);
-                                break;
-                            case 1:
-                                self.pickupIndex = PickupCatalog.FindPickupIndex(HerRecluse.itemIndex);
-                                break;
-                            case 2:
-                                self.pickupIndex = PickupCatalog.FindPickupIndex(HerFury.itemIndex);
-                                break;
-                            case 3:
-                                self.pickupIndex = PickupCatalog.FindPickupIndex(HerTorpor.itemIndex);
-                                break;
-                            case 4:
-                                self.pickupIndex = PickupCatalog.FindPickupIndex(HerRancor.itemIndex);
-                                break;
-                            case 5:
-                                self.pickupIndex = PickupCatalog.FindPickupIndex(HerPanic.itemIndex);
-                                break;
+                            switch (Mathf.FloorToInt(UnityRandom.Range(0, 6)))
+                            {
+                                case 0:
+                                    self.pickupIndex = PickupCatalog.FindPickupIndex(HerBurden.itemIndex);
+                                    break;
+                                case 1:
+                                    self.pickupIndex = PickupCatalog.FindPickupIndex(HerRecluse.itemIndex);
+                                    break;
+                                case 2:
+                                    self.pickupIndex = PickupCatalog.FindPickupIndex(HerFury.itemIndex);
+                                    break;
+                                case 3:
+                                    self.pickupIndex = PickupCatalog.FindPickupIndex(HerTorpor.itemIndex);
+                                    break;
+                                case 4:
+                                    self.pickupIndex = PickupCatalog.FindPickupIndex(HerRancor.itemIndex);
+                                    break;
+                                case 5:
+                                    self.pickupIndex = PickupCatalog.FindPickupIndex(HerPanic.itemIndex);
+                                    break;
+                            }
+                            orig(self, body, inventory);
                         }
+
+                        //Handle the size change with scripts
+                        Size(1, body, false);
+                        Size(2, body, false);
+                        return;
                     }
                 }
-                if (!Hbvst.Value && Hbdbt.Value)
-                {
-                    bool changepickup = false;
-                    if (inventory.GetItemCount(HerBurden.itemIndex) > 0 || inventory.GetItemCount(HerRecluse.itemIndex) > 0 || inventory.GetItemCount(HerFury.itemIndex) > 0 || inventory.GetItemCount(HerTorpor.itemIndex) > 0 || inventory.GetItemCount(HerRancor.itemIndex) > 0 || inventory.GetItemCount(HerPanic.itemIndex) > 0)
-                        changepickup = true;
-                    bool blacklist = false;
-                    if (self.pickupIndex == PickupCatalog.FindPickupIndex(HerRecluse.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(HerFury.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(HerTorpor.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(HerRancor.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(HerPanic.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ScrapWhite.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ScrapGreen.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ScrapRed.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ScrapYellow.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ArtifactKey.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.LunarTrinket.itemIndex))
-                        blacklist = true;
-                    if (blacklist == false && Hbgoi.Value == true)
-                        if (self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.Pearl.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ShinyPearl.itemIndex))
-                            blacklist = true;
 
-                    bool CheckRollTrue;
-                    if (Hbpul.Value == true)
-                        CheckRollTrue = Util.CheckRoll(Hbcpu.Value, inventory.GetComponent<CharacterMaster>());
-                    else
-                        CheckRollTrue = Util.CheckRoll(Hbcpu.Value);
-
-                    if (changepickup == true && CheckRollTrue == true && blacklist == false && Hbgoi.Value == true)
-                        orig(self, body, inventory);
-                    if (changepickup == true && CheckRollTrue == true && blacklist == false)
-                    {
-                        self.pickupIndex = PickupCatalog.FindPickupIndex(HerBurden.itemIndex);
-                    }
-                }
                 orig(self, body, inventory);
 
                 //Handle the size change with scripts
@@ -421,31 +417,44 @@ namespace Crystal_Burden
 
         private static void GlobalEventManager_onCharacterDeathGlobal(DamageReport report)
         {
-            if (Hbdbt.Value == true)
+            if (Hbdbt.Value)
                 return;
             if (!report.attacker || !report.attackerBody)
                 return;
-            if (report.victimMaster == null)
+            if (!report.victimMaster)
                 return;
             if (report.victimMaster.minionOwnership.ownerMaster)
                 return;
             if (report.attackerBody.inventory.GetItemCount(HerBurden.itemIndex) == 0 && report.attackerBody.inventory.GetItemCount(HerRecluse.itemIndex) == 0 && report.attackerBody.inventory.GetItemCount(HerFury.itemIndex) == 0 && report.attackerBody.inventory.GetItemCount(HerTorpor.itemIndex) == 0 && report.attackerBody.inventory.GetItemCount(HerRancor.itemIndex) == 0 && report.attackerBody.inventory.GetItemCount(HerPanic.itemIndex) == 0)
                 return;
-            bool CheckRollTrue;
-            if (Hbpul.Value == true)
-                CheckRollTrue = Util.CheckRoll(Hbedc.Value, report.attackerBody.master);
-            else
-                CheckRollTrue = Util.CheckRoll(Hbedc.Value);
-            if (CheckRollTrue && RunArtifactManager.instance.IsArtifactEnabled(RoR2Content.Artifacts.Command))
+
+            int TotalDrops;
+            float DropChance = Hbedc.Value;
+            CharacterMaster cmluck = new CharacterMaster();
+            cmluck.luck = report.attackerMaster.luck;
+            if (Hbpul.Value)
             {
-                PickupDropletController.CreatePickupDroplet(PickupCatalog.FindPickupIndex(HBItemPicker.itemIndex), report.victimBody.corePosition, Vector3.up * 20f);
+                if (Hblvf.Value)
+                    cmluck.luck = -cmluck.luck;
+                DropChance += cmluck.luck;
+            }
+            for (TotalDrops = 0; DropChance > 100; TotalDrops++)
+                DropChance -= 100;
+
+            if (Util.CheckRoll(DropChance))
+                TotalDrops++;
+            if (TotalDrops > 0 && RunArtifactManager.instance.IsArtifactEnabled(RoR2Content.Artifacts.Command))
+            {
+                for (int x = TotalDrops; x > 0; x--)
+                    PickupDropletController.CreatePickupDroplet(PickupCatalog.FindPickupIndex(HBItemPicker.itemIndex), report.victimBody.corePosition, Vector3.up * 20f);
                 return;
             }
-            if (CheckRollTrue && !Hbvst.Value)
-                PickupDropletController.CreatePickupDroplet(PickupCatalog.FindPickupIndex(HerBurden.itemIndex), report.victimBody.corePosition, Vector3.up * 20f);
-            if (CheckRollTrue && Hbvst.Value)
+            if (TotalDrops > 0 && !Hbvst.Value)
+                for (int x = TotalDrops; x > 0; x--)
+                    PickupDropletController.CreatePickupDroplet(PickupCatalog.FindPickupIndex(HerBurden.itemIndex), report.victimBody.corePosition, Vector3.up * 20f);
+            if (TotalDrops > 0 && Hbvst.Value)
             {
-                {
+                for (int x = TotalDrops; x > 0; x--)
                     switch (Mathf.FloorToInt(UnityRandom.Range(0, 6)))
                     {
                         case 0:
@@ -467,7 +476,6 @@ namespace Crystal_Burden
                             PickupDropletController.CreatePickupDroplet(PickupCatalog.FindPickupIndex(HerPanic.itemIndex), report.victimBody.corePosition, Vector3.up * 20f);
                             break;
                     }
-                }
             }
         }
 
@@ -490,27 +498,17 @@ namespace Crystal_Burden
 
         private Interactability PurchaseInteraction_GetInteractability(On.RoR2.PurchaseInteraction.orig_GetInteractability orig, PurchaseInteraction self, Interactor activator)
         {
-            if (Hbdbt.Value == false)
+            if (!Hbdbt.Value)
                 return orig(self, activator);
             CharacterBody buddy = activator.GetComponent<CharacterBody>();
             bool disablecleanse = false;
-            if (buddy.inventory.GetItemCount(HerBurden.itemIndex) > 0)
-                disablecleanse = true;
-            if (buddy.inventory.GetItemCount(HerRecluse.itemIndex) > 0)
-                disablecleanse = true;
-            if (buddy.inventory.GetItemCount(HerFury.itemIndex) > 0)
-                disablecleanse = true;
-            if (buddy.inventory.GetItemCount(HerTorpor.itemIndex) > 0)
-                disablecleanse = true;
-            if (buddy.inventory.GetItemCount(HerRancor.itemIndex) > 0)
-                disablecleanse = true;
-            if (buddy.inventory.GetItemCount(HerPanic.itemIndex) > 0)
+            if (buddy.inventory.GetItemCount(HerBurden.itemIndex) > 0 || buddy.inventory.GetItemCount(HerRecluse.itemIndex) > 0 || buddy.inventory.GetItemCount(HerFury.itemIndex) > 0 || buddy.inventory.GetItemCount(HerTorpor.itemIndex) > 0 || buddy.inventory.GetItemCount(HerRancor.itemIndex) > 0 || buddy.inventory.GetItemCount(HerPanic.itemIndex) > 0)
                 disablecleanse = true;
             if (self.costType == CostTypeIndex.LunarItemOrEquipment)
             {
                 if (self.displayNameToken.ToLower() == "shrine_cleanse_name")
                 {
-                    if (buddy && buddy.inventory && disablecleanse == true)
+                    if (buddy && buddy.inventory && disablecleanse)
                     {
                         return Interactability.Disabled;
                     }
@@ -521,7 +519,7 @@ namespace Crystal_Burden
 
         private void Duplicating_OnEnter(On.EntityStates.Duplicator.Duplicating.orig_OnEnter orig, EntityStates.Duplicator.Duplicating self)
         {
-            if (Hbdbt.Value == false)
+            if (!Hbdbt.Value)
             {
                 orig(self);
                 return;
@@ -548,7 +546,7 @@ namespace Crystal_Burden
             {
                 itemcount += body.inventory.GetItemCount(items[i]);
             }
-            if (itemcount > 1 && Hbgoi.Value == true)
+            if (itemcount > 1 && Hbgoi.Value)
             {
                 switch (Mathf.FloorToInt(UnityRandom.Range(0, items.Count)))
                 {
@@ -589,15 +587,15 @@ namespace Crystal_Burden
         private void CharacterBody_Update(On.RoR2.CharacterBody.orig_Update orig, CharacterBody self)
         {
             orig(self);
-            if (Hbvsm.Value == true)
+            if (Hbvsm.Value)
                 Size(9, self, true);
-            else if (Hbvsm.Value == false)
+            else if (!Hbvsm.Value)
                 Size(7, self, true);
             Size(8, self, true);
         }
         public void Size(int operation, CharacterBody body, bool truefalse)
         {
-            if (Hbisos.Value == false)
+            if (!Hbisos.Value)
                 return;
             LocalUser LU = LocalUserManager.GetFirstLocalUser();
             if (LU == null)
@@ -838,7 +836,7 @@ namespace Crystal_Burden
                                         healthmultiplier *= Mathf.Pow(1 + (Hbbuff.Value - 1) * localmultiplier, itemCount);
                                 }
                                 int itemCount2 = cb.master.inventory.GetItemCount(HerFury.itemIndex);
-                                if (itemCount2 > 0 && Hbdbt.Value == true)
+                                if (itemCount2 > 0 && Hbdbt.Value)
                                 {
                                     if (cb.GetBuffCount(HerGambleDeBuff.buffIndex) > 0)
                                         healthmultiplier *= Mathf.Pow(1 - (1 - Hbdebuff.Value) * localmultiplier * 2, itemCount2);
@@ -878,7 +876,7 @@ namespace Crystal_Burden
                                         shieldmultiplier *= Mathf.Pow(1 + (Hbbuff.Value - 1) * localmultiplier, itemCount);
                                 }
                                 int itemCount2 = cb.master.inventory.GetItemCount(HerFury.itemIndex);
-                                if (itemCount2 > 0 && Hbdbt.Value == true)
+                                if (itemCount2 > 0 && Hbdbt.Value)
                                 {
                                     if (cb.GetBuffCount(HerGambleDeBuff.buffIndex) > 0)
                                         shieldmultiplier *= Mathf.Pow(1 - (1 - Hbdebuff.Value) * localmultiplier * 2, itemCount2);
@@ -916,7 +914,7 @@ namespace Crystal_Burden
                                         attackSpeedmultiplier *= Mathf.Pow(1 + (Hbbuff.Value - 1) * localmultiplier, itemCount);
                                 }
                                 int itemCount2 = cb.master.inventory.GetItemCount(HerTorpor.itemIndex);
-                                if (itemCount2 > 0 && Hbdbt.Value == true)
+                                if (itemCount2 > 0 && Hbdbt.Value)
                                 {
                                     if (cb.GetBuffCount(HerGambleDeBuff.buffIndex) > 0)
                                         attackSpeedmultiplier *= Mathf.Pow(1 - (1 - Hbdebuff.Value) * localmultiplier * 2, itemCount2);
@@ -954,7 +952,7 @@ namespace Crystal_Burden
                                         moveSpeedmultiplier *= Mathf.Pow(1 + (Hbbuff.Value - 1) * localmultiplier, itemCount);
                                 }
                                 int itemCount2 = cb.master.inventory.GetItemCount(HerBurden.itemIndex);
-                                if (itemCount2 > 0 && Hbdbt.Value == true)
+                                if (itemCount2 > 0 && Hbdbt.Value)
                                 {
                                     if (cb.GetBuffCount(HerGambleDeBuff.buffIndex) > 0)
                                         moveSpeedmultiplier *= Mathf.Pow(1 - (1 - Hbdebuff.Value) * localmultiplier * 2, itemCount2);
@@ -1016,7 +1014,7 @@ namespace Crystal_Burden
                                         armormultiplier *= Mathf.Pow(1 + (Hbbuff.Value - 1) * localmultiplier, itemCount - 1);
                                 }
                                 int itemCount2 = cb.master.inventory.GetItemCount(HerRancor.itemIndex);
-                                if (itemCount2 > 0 && Hbdbt.Value == true)
+                                if (itemCount2 > 0 && Hbdbt.Value)
                                 {
                                     if (cb.GetBuffCount(HerGambleDeBuff.buffIndex) > 0)
                                         armormultiplier *= Mathf.Pow(1 - (1 - Hbdebuff.Value) * localmultiplier * 2, itemCount2);
@@ -1054,7 +1052,7 @@ namespace Crystal_Burden
                                         damagemultiplier *= Mathf.Pow(1 + (Hbbuff.Value - 1) * localmultiplier, itemCount);
                                 }
                                 int itemCount2 = cb.master.inventory.GetItemCount(HerPanic.itemIndex);
-                                if (itemCount2 > 0 && Hbdbt.Value == true)
+                                if (itemCount2 > 0 && Hbdbt.Value)
                                 {
                                     if (cb.GetBuffCount(HerGambleDeBuff.buffIndex) > 0)
                                         damagemultiplier *= Mathf.Pow(1 - (1 - Hbdebuff.Value) * localmultiplier * 2, itemCount2);
@@ -1117,7 +1115,7 @@ namespace Crystal_Burden
                                         regenmultiplier *= Mathf.Pow(1 + (Hbbuff.Value - 1) * localmultiplier, itemCount);
                                 }
                                 int itemCount2 = cb.master.inventory.GetItemCount(HerRecluse.itemIndex);
-                                if (itemCount2 > 0 && Hbdbt.Value == true)
+                                if (itemCount2 > 0 && Hbdbt.Value)
                                 {
                                     if (cb.GetBuffCount(HerGambleDeBuff.buffIndex) > 0)
                                         regenmultiplier *= Mathf.Pow(1 - (1 - Hbdebuff.Value) * localmultiplier * 2, itemCount2);
