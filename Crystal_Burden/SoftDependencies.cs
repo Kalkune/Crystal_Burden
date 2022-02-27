@@ -12,6 +12,9 @@ namespace Crystal_Burden
         {
             if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.OkIgotIt.Her_Burden"))
                 HerBurdenInstalled = true;
+            if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.Maiesen.BodyBlend"))
+                BodyBlend = true;
+
         }
     }
 }

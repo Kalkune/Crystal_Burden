@@ -20,17 +20,17 @@ namespace Crystal_Burden
         public static void Init()
         {
             ItemTier Hbtier = ItemTier.Lunar;
-            if (!Hbdbt.Value)
+            if (!ToggleDebuffs.Value)
                 Hbtier = ItemTier.Tier3;
             else
                 tier = "Lunar";
             HerTorpor = ScriptableObject.CreateInstance<ItemDef>();
-            if (Hbnsfw?.Value ?? false)
+            if (Nsfw?.Value ?? false)
             {
                 HerTorpor.name = "HERTORPOR";
                 HerTorpor.nameToken = "Her Torpor";
             }
-            else if (!Hbnsfw?.Value ?? true)
+            else if (!Nsfw?.Value ?? true)
             {
                 HerTorpor.name = "HERTORPOR";
                 HerTorpor.nameToken = "Crystal Torpor";
@@ -40,33 +40,33 @@ namespace Crystal_Burden
             HerTorpor.descriptionToken = HERTORPOR_DESC;
             HerTorpor.loreToken = HERTORPOR_LORE;
             HerTorpor.tier = Hbtier;
-            if (Hbnsfw?.Value ?? false)
-                HerTorpor.pickupIconSprite = Crystal_Burden.bundle.LoadAsset<Sprite>(Hbiiv.Value + "royalblueItemIcon");
-            else if (!Hbnsfw?.Value ?? true)
+            if (Nsfw?.Value ?? false)
+                HerTorpor.pickupIconSprite = Crystal_Burden.bundle.LoadAsset<Sprite>(Artist.Value + "royalblueItemIcon");
+            else if (!Nsfw?.Value ?? true)
                 HerTorpor.pickupIconSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("Brdn_Crystal_Torpor" + tier + "ItemIcon");
-            if (Hbnsfw?.Value ?? false)
-                HerTorpor.pickupModelPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>(Hbiiv.Value + "royalblueher_burden");
-            else if (!Hbnsfw?.Value ?? true)
+            if (Nsfw?.Value ?? false)
+                HerTorpor.pickupModelPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>(Artist.Value + "royalblueher_burden");
+            else if (!Nsfw?.Value ?? true)
                 HerTorpor.pickupModelPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>("Brdn_Crystal_Torpor");
             HerTorpor.canRemove = true;
             HerTorpor.hidden = false;
-            if (!Hbvst.Value)
+            if (!VariantDropCount.Value)
                 HerTorpor.tags = new ItemTag[] { ItemTag.WorldUnique, (ItemTag)19 };
             else
                 HerTorpor.tags = new ItemTag[] { (ItemTag)19 };
 
-            var rules = new Items.CharacterItemDisplayRuleSet();
+            var rules = new ItemDisplays.CharacterItemDisplayRuleSet();
             AddLocation(rules);
             Items.Add(HerTorpor, rules);
         }
         private static void AddTokens()
         {
-            if (Hbdbt.Value)
+            if (ToggleDebuffs.Value)
             {
                 HERTORPOR_PICKUP = "Increase regen and decrease attack speed.\nAll item drops are now variants of: <color=#307FFF>" + HerBurden.nameToken + "</color>";
                 HERTORPOR_DESC = $"Increase regen by {Hbbv}% and decrease attack speed by {Hbdbv}%.\nAll item drops are now variants of: <color=#307FFF>" + HerBurden.nameToken + "</color>";
             }
-            if (!Hbdbt.Value)
+            if (!ToggleDebuffs.Value)
             {
                 HERTORPOR_PICKUP = "Increase regen.\nMonsters now have a chance to drop variants of: <color=#e7553b>" + HerBurden.nameToken + "</color>";
                 HERTORPOR_DESC = $"Increase regen by {Hbbv}%.\nMonsters now have a chance to drop variants of: <color=#e7553b>" + HerBurden.nameToken + "</color>";
@@ -74,11 +74,11 @@ namespace Crystal_Burden
             HERTORPOR_LORE = "None";
 
         }
-        public static void AddLocation(Items.CharacterItemDisplayRuleSet rules)
+        public static void AddLocation(ItemDisplays.CharacterItemDisplayRuleSet rules)
         {
-            if (!Hbisos.Value && (Hbnsfw?.Value ?? false))
+            if (!ItemVisibility.Value && (Nsfw?.Value ?? false))
             {
-                GameObject followerPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>(Hbiiv.Value + "royalblueher_burden");
+                GameObject followerPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>(Artist.Value + "royalblueher_burden");
                 followerPrefab.AddComponent<FakeTorporPrefabSizeScript>();
                 Vector3 generalScale = new Vector3(.0125f, .0125f, .0125f);
                 _ = new ItemDisplayRule[]
@@ -94,9 +94,9 @@ namespace Crystal_Burden
                 }
                 };
             }
-            if (!Hbisos.Value && (!Hbnsfw?.Value ?? true))
+            if (!ItemVisibility.Value && (!Nsfw?.Value ?? true))
             {
-                GameObject followerPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>(Hbiiv.Value + "royalblueher_burden");
+                GameObject followerPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>(Artist.Value + "royalblueher_burden");
                 followerPrefab.AddComponent<FakeTorporPrefabSizeScript>();
                 Vector3 generalScale = new Vector3(.0125f, .0125f, .0125f);
                 _ = new ItemDisplayRule[]
@@ -112,17 +112,17 @@ namespace Crystal_Burden
                 }
                 };
             }
-            if (Hbisos.Value && (Hbnsfw?.Value ?? false))
+            if (ItemVisibility.Value && (Nsfw?.Value ?? false))
             {
-                GameObject followerPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>(Hbiiv.Value + "royalblueher_burden");
-                if (Hbvos.Value == "Torpor")
+                GameObject followerPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>(Artist.Value + "royalblueher_burden");
+                if (VariantShownOnSurvivor.Value == "Torpor")
                 {
                     followerPrefab.AddComponent<PrefabSizeScript>();
-                    followerPrefab.transform.Find("DildoTrail").gameObject.SetActive(Hbptv.Value);
+                    followerPrefab.transform.Find("DildoTrail").gameObject.SetActive(ParticleTrail.Value);
                 }
                 else
                 {
-                    followerPrefab.AddComponent<FakeBurdenPrefabSizeScript>();
+                    followerPrefab.AddComponent<FakeTorporPrefabSizeScript>();
                     followerPrefab.transform.Find("DildoTrail").gameObject.SetActive(false);
                 }
                 Vector3 generalScale = new Vector3(.0125f, .0125f, .0125f);
@@ -246,8 +246,18 @@ namespace Crystal_Burden
                     localScale = generalScale
                 }, "mdlHeretic"
                 );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "HandR",
+                    localPos = new Vector3(0.005f, -0.0075f, 0f),
+                    localAngles = new Vector3(45f, -4f, 0f),
+                    localScale = generalScale * 0.25f
+                }, "mdlMEL-T2"
+                );
             }
-            if (Hbisos.Value && (!Hbnsfw?.Value ?? true))
+            if (ItemVisibility.Value && (!Nsfw?.Value ?? true))
             {
                 GameObject followerPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>("Brdn_Crystal_Torpor");
                 Material what = Resources.Load<GameObject>("prefabs/networkedobjects/LockedMage").transform.Find("ModelBase/IceMesh").GetComponent<MeshRenderer>().materials[0];
@@ -259,9 +269,9 @@ namespace Crystal_Burden
                 materials[3].shader = what2.shader;
                 materials[3].CopyPropertiesFromMaterial(what2);
                 followerPrefab.GetComponent<MeshRenderer>().materials = materials;
-                if (Hbvos.Value == "Torpor")
+                if (VariantShownOnSurvivor.Value == "Torpor")
                     followerPrefab.AddComponent<PrefabSizeScript>();
-                if (Hbvos.Value != "Torpor")
+                if (VariantShownOnSurvivor.Value != "Torpor")
                     followerPrefab.AddComponent<FakeTorporPrefabSizeScript>();
                 Vector3 generalScale = new Vector3(.0125f, .0125f, .0125f);
                 rules.AddCharacterModelRule(new ItemDisplayRule
@@ -378,11 +388,21 @@ namespace Crystal_Burden
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
-                    childName = "Chest",
-                    localPos = new Vector3(0.05f, 0.1f, -0.05f),
-                    localAngles = new Vector3(180f, 0f, 0f),
+                    childName = "KneeL",
+                    localPos = new Vector3(0.1f, -0.2f, 0f),
+                    localAngles = new Vector3(80f, 20f, 115f),
                     localScale = generalScale
                 }, "mdlHeretic"
+                );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "KneeL",
+                    localPos = new Vector3(-0.0015f, 0.0525f, 0.015f),
+                    localAngles = new Vector3(5f, -52.5f, 175.5f),
+                    localScale = generalScale * 0.25f
+                }, "mdlMEL-T2"
                 );
             }
         }

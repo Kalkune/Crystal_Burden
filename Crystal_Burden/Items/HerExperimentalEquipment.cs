@@ -20,18 +20,18 @@ namespace Crystal_Burden
         public static void Init()
         {
             var Hgcolor = ColorCatalog.ColorIndex.LunarItem;
-            if (!Hbdbt.Value)
+            if (!ToggleDebuffs.Value)
                 Hgcolor = ColorCatalog.ColorIndex.Equipment;
             else
                 tier = "Lunar";
             AddTokens();
             HerGamble = ScriptableObject.CreateInstance<EquipmentDef>();
-            if (Hbnsfw?.Value ?? false)
+            if (Nsfw?.Value ?? false)
             {
                 HerGamble.name = "HERGAMBLE";
                 HerGamble.nameToken = "Her Gamble";
             }
-            else if (!Hbnsfw?.Value ?? true)
+            else if (!Nsfw?.Value ?? true)
             {
                 HerGamble.name = "HERGAMBLE";
                 HerGamble.nameToken = "Crystal Gamble";
@@ -39,44 +39,45 @@ namespace Crystal_Burden
             HerGamble.pickupToken = HERGAMBLE_PICKUP;
             HerGamble.descriptionToken = HERGAMBLE_DESC;
             HerGamble.loreToken = HERGAMBLE_LORE;
-            HerGamble.isLunar = Hbdbt.Value;
+            HerGamble.isLunar = ToggleDebuffs.Value;
             HerGamble.colorIndex = Hgcolor;
-            if (Hbnsfw?.Value ?? false)
+            if (Nsfw?.Value ?? false)
                 HerGamble.pickupIconSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("Gamble" + tier + "EquipmentIcon");
-            else if (!Hbnsfw?.Value ?? true)
+            else if (!Nsfw?.Value ?? true)
                 HerGamble.pickupIconSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("Brdn_Crystal_Gamble" + tier + "EquipmentIcon");
-            if (Hbnsfw?.Value ?? false)
+            if (Nsfw?.Value ?? false)
                 HerGamble.pickupModelPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>("her_gamble");
-            else if (!Hbnsfw?.Value ?? true)
+            else if (!Nsfw?.Value ?? true)
                 HerGamble.pickupModelPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>("Brdn_Crystal_Gamble");
             HerGamble.canDrop = true;
             HerGamble.cooldown = 60f;
             HerGambleBuff = ScriptableObject.CreateInstance<BuffDef>();
             HerGambleBuff.name = "HerGambleBuff";
-            if (Hbnsfw?.Value ?? false)
+            if (Nsfw?.Value ?? false)
                 HerGambleBuff.iconSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("GambleEquipmentIcon");
-            else if (!Hbnsfw?.Value ?? true)
+            else if (!Nsfw?.Value ?? true)
                 HerGambleBuff.iconSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("Brdn_Crystal_GambleEquipmentIcon");
             Buffs.Add(HerGambleBuff);
             HerGambleDeBuff = ScriptableObject.CreateInstance<BuffDef>();
             HerGambleDeBuff.name = "HerGambleDeBuff";
-            if (Hbnsfw?.Value ?? false)
-                HerGambleDeBuff.iconSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("GambleEquipmentIcon");
-            else if (!Hbnsfw?.Value ?? true)
-                HerGambleDeBuff.iconSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("Brdn_Crystal_GambleEquipmentIcon");
+            HerGambleDeBuff.isDebuff = true;
+            if (Nsfw?.Value ?? false)
+                HerGambleDeBuff.iconSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("Gamble" + tier + "EquipmentIcon");
+            else if (!Nsfw?.Value ?? true)
+                HerGambleDeBuff.iconSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("Brdn_Crystal_Gamble" + tier + "EquipmentIcon");
             Buffs.Add(HerGambleDeBuff);
-            var rules = new Items.CharacterItemDisplayRuleSet();
+            var rules = new ItemDisplays.CharacterItemDisplayRuleSet();
             AddLocation(rules);
-            Items.Add(HGEquipmentDisplay, rules);
+            Equipments.Add(HerGamble, rules);
         }
         private static void AddTokens()
         {
-            if (Hbdbt.Value)
+            if (ToggleDebuffs.Value)
             {
                 HERGAMBLE_PICKUP = "An equipment that gambles your stats";
                 HERGAMBLE_DESC = "An equipment that gambles your stats that come from " + HerBurden.nameToken + " Variants";
             }
-            if (!Hbdbt.Value)
+            if (!ToggleDebuffs.Value)
             {
                 HERGAMBLE_PICKUP = "Has a chance to double your stats";
                 HERGAMBLE_DESC = "Has a chance to double your stats that come from " + HerBurden.nameToken + " Variants";
@@ -84,9 +85,9 @@ namespace Crystal_Burden
             HERGAMBLE_LORE = "None";
 
         }
-        public static void AddLocation(Items.CharacterItemDisplayRuleSet rules)
+        public static void AddLocation(ItemDisplays.CharacterItemDisplayRuleSet rules)
         {
-            if (!Hbisos.Value && (Hbnsfw?.Value ?? false))
+            if (!ItemVisibility.Value && (Nsfw?.Value ?? false))
             {
                 GameObject followerPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>("her_gamble");
                 Vector3 generalScale = new Vector3(.0125f, .0125f, .0125f);
@@ -103,7 +104,7 @@ namespace Crystal_Burden
                 }
                 };
             }
-            if (!Hbisos.Value && (!Hbnsfw?.Value ?? true))
+            if (!ItemVisibility.Value && (!Nsfw?.Value ?? true))
             {
                 GameObject followerPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>("Brdn_Crystal_Gamble");
                 Vector3 generalScale = new Vector3(.0125f, .0125f, .0125f);
@@ -120,7 +121,7 @@ namespace Crystal_Burden
                 }
                 };
             }
-            if (Hbisos.Value && (Hbnsfw?.Value ?? false))
+            if (ItemVisibility.Value && (Nsfw?.Value ?? false))
             {
                 GameObject followerPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>("her_gamble");
                 Vector3 generalScale = new Vector3(.0125f, .0125f, .0125f);
@@ -245,7 +246,7 @@ namespace Crystal_Burden
                 }, "mdlHeretic"
                 );
             }
-            if (Hbisos.Value && (!Hbnsfw?.Value ?? true))
+            if (ItemVisibility.Value && (!Nsfw?.Value ?? true))
             {
                 GameObject followerPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>("Brdn_Crystal_Gamble");
                 Material what = Resources.Load<GameObject>("prefabs/networkedobjects/LockedMage").transform.Find("ModelBase/IceMesh").GetComponent<MeshRenderer>().materials[0];
@@ -377,6 +378,16 @@ namespace Crystal_Burden
                     localAngles = new Vector3(90f, 0f, 0f),
                     localScale = generalScale * 2
                 }, "mdlHeretic"
+                );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "Body",
+                    localPos = new Vector3(0f, 0.03f, 0f),
+                    localAngles = new Vector3(0f, 0f, 0f),
+                    localScale = generalScale * 0.25f
+                }, "mdlMEL-T2"
                 );
             }
         }

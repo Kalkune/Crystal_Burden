@@ -20,17 +20,17 @@ namespace Crystal_Burden
         public static void Init()
         {
             ItemTier Hbtier = ItemTier.Lunar;
-            if (!Hbdbt.Value)
+            if (!ToggleDebuffs.Value)
                 Hbtier = ItemTier.Tier3;
             else
                 tier = "Lunar";
             HerFury = ScriptableObject.CreateInstance<ItemDef>();
-            if (Hbnsfw?.Value ?? false)
+            if (Nsfw?.Value ?? false)
             {
                 HerFury.name = "HERFURY";
                 HerFury.nameToken = "Her Fury";
             }
-            else if (!Hbnsfw?.Value ?? true)
+            else if (!Nsfw?.Value ?? true)
             {
                 HerFury.name = "HERFURY";
                 HerFury.nameToken = "Crystal Fury";
@@ -40,33 +40,33 @@ namespace Crystal_Burden
             HerFury.descriptionToken = HERFURY_DESC;
             HerFury.loreToken = HERFURY_LORE;
             HerFury.tier = Hbtier;
-            if (Hbnsfw?.Value ?? false)
-                HerFury.pickupIconSprite = Crystal_Burden.bundle.LoadAsset<Sprite>(Hbiiv.Value + "reallyredItemIcon");
-            else if (!Hbnsfw?.Value ?? true)
+            if (Nsfw?.Value ?? false)
+                HerFury.pickupIconSprite = Crystal_Burden.bundle.LoadAsset<Sprite>(Artist.Value + "reallyredItemIcon");
+            else if (!Nsfw?.Value ?? true)
                 HerFury.pickupIconSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("Brdn_Crystal_Fury" + tier + "ItemIcon");
-            if (Hbnsfw?.Value ?? false)
-                HerFury.pickupModelPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>(Hbiiv.Value + "reallyredher_burden");
-            else if (!Hbnsfw?.Value ?? true)
+            if (Nsfw?.Value ?? false)
+                HerFury.pickupModelPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>(Artist.Value + "reallyredher_burden");
+            else if (!Nsfw?.Value ?? true)
                 HerFury.pickupModelPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>("Brdn_Crystal_Fury");
             HerFury.canRemove = true;
             HerFury.hidden = false;
-            if (!Hbvst.Value)
+            if (!VariantDropCount.Value)
                 HerFury.tags = new ItemTag[] { ItemTag.WorldUnique, (ItemTag)19 };
             else
                 HerFury.tags = new ItemTag[] { (ItemTag)19 };
 
-            var rules = new Items.CharacterItemDisplayRuleSet();
+            var rules = new ItemDisplays.CharacterItemDisplayRuleSet();
             AddLocation(rules);
             Items.Add(HerFury, rules);
         }
         private static void AddTokens()
         {
-            if (Hbdbt.Value)
+            if (ToggleDebuffs.Value)
             {
                 HERFURY_PICKUP = "Increase attack speed and decrease HP.\nAll item drops are now variants of: <color=#307FFF>" + HerBurden.nameToken + "</color>";
                 HERFURY_DESC = $"Increase attack speed by {Hbbv}% and decrease HP by {Hbdbv}%.\nAll item drops are now variants of: <color=#307FFF>" + HerBurden.nameToken + "</color>";
             }
-            if (!Hbdbt.Value)
+            if (!ToggleDebuffs.Value)
             {
                 HERFURY_PICKUP = "Increase attack speed.\nMonsters now have a chance to drop variants of: <color=#e7553b>" + HerBurden.nameToken + "</color>";
                 HERFURY_DESC = $"Increase attack speed by {Hbbv}%.\nMonsters now have a chance to drop variants of: <color=#e7553b>" + HerBurden.nameToken + "</color>";
@@ -74,11 +74,11 @@ namespace Crystal_Burden
             HERFURY_LORE = "None";
 
         }
-        public static void AddLocation(Items.CharacterItemDisplayRuleSet rules)
+        public static void AddLocation(ItemDisplays.CharacterItemDisplayRuleSet rules)
         {
-            if (!Hbisos.Value && (Hbnsfw?.Value ?? false))
+            if (!ItemVisibility.Value && (Nsfw?.Value ?? false))
             {
-                GameObject followerPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>(Hbiiv.Value + "reallyredher_burden");
+                GameObject followerPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>(Artist.Value + "reallyredher_burden");
                 followerPrefab.AddComponent<FakeFuryPrefabSizeScript>();
                 Vector3 generalScale = new Vector3(.0125f, .0125f, .0125f);
                 _ = new ItemDisplayRule[]
@@ -94,7 +94,7 @@ namespace Crystal_Burden
                 }
                 };
             }
-            if (!Hbisos.Value && (!Hbnsfw?.Value ?? true))
+            if (!ItemVisibility.Value && (!Nsfw?.Value ?? true))
             {
                 GameObject followerPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>("Brdn_Crystal_Fury");
                 followerPrefab.AddComponent<FakeFuryPrefabSizeScript>();
@@ -112,17 +112,17 @@ namespace Crystal_Burden
                 }
                 };
             }
-            if (Hbisos.Value && (Hbnsfw?.Value ?? false))
+            if (ItemVisibility.Value && (Nsfw?.Value ?? false))
             {
-                GameObject followerPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>(Hbiiv.Value + "reallyredher_burden");
-                if (Hbvos.Value == "Fury")
+                GameObject followerPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>(Artist.Value + "reallyredher_burden");
+                if (VariantShownOnSurvivor.Value == "Fury")
                 {
                     followerPrefab.AddComponent<PrefabSizeScript>();
-                    followerPrefab.transform.Find("DildoTrail").gameObject.SetActive(Hbptv.Value);
+                    followerPrefab.transform.Find("DildoTrail").gameObject.SetActive(ParticleTrail.Value);
                 }
                 else
                 {
-                    followerPrefab.AddComponent<FakeBurdenPrefabSizeScript>();
+                    followerPrefab.AddComponent<FakeFuryPrefabSizeScript>();
                     followerPrefab.transform.Find("DildoTrail").gameObject.SetActive(false);
                 }
                 Vector3 generalScale = new Vector3(.0125f, .0125f, .0125f);
@@ -246,8 +246,18 @@ namespace Crystal_Burden
                     localScale = generalScale
                 }, "mdlHeretic"
                 );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "HandR",
+                    localPos = new Vector3(0.005f, -0.0075f, 0f),
+                    localAngles = new Vector3(45f, -4f, 0f),
+                    localScale = generalScale * 0.25f
+                }, "mdlMEL-T2"
+                );
             }
-            if (Hbisos.Value && (!Hbnsfw?.Value ?? true))
+            if (ItemVisibility.Value && (!Nsfw?.Value ?? true))
             {
                 GameObject followerPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>("Brdn_Crystal_Fury");
                 Material what = Resources.Load<GameObject>("prefabs/networkedobjects/LockedMage").transform.Find("ModelBase/IceMesh").GetComponent<MeshRenderer>().materials[0];
@@ -259,9 +269,9 @@ namespace Crystal_Burden
                 materials[3].shader = what2.shader;
                 materials[3].CopyPropertiesFromMaterial(what2);
                 followerPrefab.GetComponent<MeshRenderer>().materials = materials;
-                if (Hbvos.Value == "Fury")
+                if (VariantShownOnSurvivor.Value == "Fury")
                     followerPrefab.AddComponent<PrefabSizeScript>();
-                if (Hbvos.Value != "Fury")
+                if (VariantShownOnSurvivor.Value != "Fury")
                     followerPrefab.AddComponent<FakeFuryPrefabSizeScript>();
                 Vector3 generalScale = new Vector3(.0125f, .0125f, .0125f);
                 rules.AddCharacterModelRule(new ItemDisplayRule
@@ -383,6 +393,16 @@ namespace Crystal_Burden
                     localAngles = new Vector3(-90f, 90f, 0f),
                     localScale = generalScale
                 }, "mdlHeretic"
+                );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "Waist",
+                    localPos = new Vector3(0.02f, 0.032f, 0.043f),
+                    localAngles = new Vector3(0f, 90f, 180f),
+                    localScale = generalScale * 0.25f
+                }, "mdlMEL-T2"
                 );
             }
         }

@@ -44,6 +44,9 @@ namespace Crystal_Burden
                 case "HERETIC_BODY_NAME":
                     bodySizeMultiplier = 2;
                     break;
+                case "MELT_NAME":
+                    bodySizeMultiplier = 0.25f;
+                    break;
                 //If there isn't a special rule, default to default
                 default:
                     bodySizeMultiplier = 1;

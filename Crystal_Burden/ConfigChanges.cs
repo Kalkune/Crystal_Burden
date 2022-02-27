@@ -12,9 +12,11 @@ namespace Crystal_Burden
         {
             if (Hbversion.Value == "1.5.0")
             {
-                Hbpul.Value = true;
+                LuckEffect.Value = true;
                 Hbversion.Value = "1.5.1";
             }
+            if (Hbversion.Value == "1.5.1")
+                Hbversion.Value = "1.5.2";
         }
     }
 }

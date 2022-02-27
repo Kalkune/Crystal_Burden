@@ -9,7 +9,7 @@ namespace Crystal_Burden
         private Vector3 newScale;
         internal float characterSizeMultiplier;
         //These could be set in a config if you wanted to
-        internal static float maxSizeMultiplier = Crystal_Burden.Hbims.Value, stackSizeMultiplier = Crystal_Burden.Hbims.Value / Crystal_Burden.Hbism.Value;
+        internal static float maxSizeMultiplier = Crystal_Burden.MaxSize.Value, stackSizeMultiplier = (Crystal_Burden.MaxSize.Value - 1) / Crystal_Burden.SizeMultiplier.Value;
 
         private void OnEnable()
         {

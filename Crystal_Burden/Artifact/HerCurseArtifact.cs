@@ -10,19 +10,20 @@ namespace Crystal_Burden
             HerCurse = ScriptableObject.CreateInstance<ArtifactDef>();
 
             HerCurse.descriptionToken = "All item drops will be turned into " + HerBurden.nameToken + " Variants";
-            if (Hbnsfw?.Value ?? false)
+            if (Nsfw?.Value ?? false)
             {
                 HerCurse.nameToken = "Artifact of Her Curse";
                 HerCurse.smallIconSelectedSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("HerCurseArtifactBurdenEnabled");
                 HerCurse.smallIconDeselectedSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("HerCurseArtifactBurdenDisabled");
             }
-            else if (!Hbnsfw?.Value ?? true)
+            else if (!Nsfw?.Value ?? true)
             {
                 HerCurse.nameToken = "Artifact of Crystal Curse";
                 HerCurse.smallIconSelectedSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("HerCurseArtifactCrystalEnabled");
                 HerCurse.smallIconDeselectedSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("HerCurseArtifactCrystalDisabled");
 
             }
+            BetterAPI.Artifacts.Add(HerCurse);
         }
     }
 }
