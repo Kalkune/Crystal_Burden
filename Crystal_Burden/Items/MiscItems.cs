@@ -13,12 +13,6 @@ namespace Crystal_Burden
     {
         public static void Init()
         {
-            HGEquipmentDisplay = ScriptableObject.CreateInstance<ItemDef>();
-            HGEquipmentDisplay.name = "HGEQUIPMENTDISPLAY";
-            HGEquipmentDisplay.nameToken = "HG Equipment Display";
-            HGEquipmentDisplay.tier = ItemTier.NoTier;
-            HGEquipmentDisplay.hidden = true;
-
             HBItemPicker = ScriptableObject.CreateInstance<ItemDef>();
             HBItemPicker.name = "HBITEMPICKER";
             HBItemPicker.nameToken = "HB Item Picker";

@@ -38,19 +38,24 @@
     <Reference Include="BepInEx">
       <HintPath>..\..\ahope\BepInEx.dll</HintPath>
     </Reference>
-    <Reference Include="BetterAPI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="BetterAPI, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\ahope\BetterAPI.dll</HintPath>
     </Reference>
     <Reference Include="BodyBlend">
       <HintPath>..\..\ahope\BodyBlend.dll</HintPath>
     </Reference>
+    <Reference Include="com.unity.multiplayer-hlapi.Runtime">
+      <HintPath>..\..\ahope\stubs\com.unity.multiplayer-hlapi.Runtime.dll</HintPath>
+    </Reference>
     <Reference Include="HGCSharpUtils">
       <HintPath>..\..\ahope\HGCSharpUtils.dll</HintPath>
     </Reference>
-    <Reference Include="MMHOOK_Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\ahope\MMHOOK_Assembly-CSharp.dll</HintPath>
+    <Reference Include="LegacyResourcesAPI">
+      <HintPath>..\..\ahope\stubs\LegacyResourcesAPI.dll</HintPath>
+    </Reference>
+    <Reference Include="MMHOOK_RoR2">
+      <HintPath>..\..\ahope\MMHOOK_RoR2.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Cecil">
       <HintPath>..\..\ahope\Mono.Cecil.dll</HintPath>
@@ -60,6 +65,9 @@
     </Reference>
     <Reference Include="MonoMod.Utils">
       <HintPath>..\..\ahope\MonoMod.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="RoR2">
+      <HintPath>..\..\ahope\stubs\RoR2.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\..\ahope\UnityEngine.dll</HintPath>

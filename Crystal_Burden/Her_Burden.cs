@@ -26,7 +26,7 @@ namespace Crystal_Burden
     [BepInDependency("com.xoxfaby.BetterAPI", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("com.OkIgotIt.Her_Burden", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("com.Maiesen.BodyBlend", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.Kalkune.Crystal_Burden", "Crystal_Burden", "1.5.2")]
+    [BepInPlugin("com.Kalkune.Crystal_Burden", "Crystal_Burden", "1.5.3")]
 
     public class Crystal_Burden : BaseUnityPlugin
     {
@@ -37,7 +37,6 @@ namespace Crystal_Burden
         public static ItemDef HerTorpor;
         public static ItemDef HerRancor;
         public static ItemDef HerPanic;
-        public static ItemDef HGEquipmentDisplay;
         public static ItemDef HBItemPicker;
         public static EquipmentDef HerGamble;
         public static BuffDef HerGambleBuff;
@@ -123,106 +122,6 @@ namespace Crystal_Burden
             //damage-armor          Her Rancor
             //moveSpeed-damage      Her Panic
 
-            On.RoR2.GenericPickupController.GrantItem += (orig, self, body, inventory) =>
-            {
-                if (RunArtifactManager.instance.IsArtifactEnabled(HerCurse))
-                {
-                    orig(self, body, inventory);
-
-                    //Handle the size change with scripts
-                    Size(1, body, false);
-                    Size(2, body, false);
-                    return;
-                }
-
-                if (ToggleDebuffs.Value)
-                {
-                    int TotalDrops;
-                    float DropChance = ChanceChangePickup.Value;
-                    int VariantCount = inventory.GetItemCount(HerBurden.itemIndex) + inventory.GetItemCount(HerRecluse.itemIndex) + inventory.GetItemCount(HerFury.itemIndex) + inventory.GetItemCount(HerTorpor.itemIndex) + inventory.GetItemCount(HerRancor.itemIndex) + inventory.GetItemCount(HerPanic.itemIndex);
-
-                    float TempMaxOverflow = VariantCount - LimitDecreaseItemDropPercentage.Value;
-                    if (TempMaxOverflow < 0)
-                        TempMaxOverflow = 0;
-
-                    if (DropChance > MinimumDropChance.Value && VariantCount > LimitDecreaseItemDropPercentage.Value)
-                    {
-                        DropChance *= Mathf.Pow(DecreaseItemDropPercentage.Value, TempMaxOverflow);
-                        if (DropChance < MinimumDropChance.Value)
-                            DropChance = MinimumDropChance.Value;
-                    }
-
-                    CharacterMaster cmluck = new CharacterMaster();
-                    cmluck.luck = inventory.GetComponent<CharacterMaster>().luck;
-                    if (LuckEffect.Value)
-                    {
-                        if (LuckInverseEffect.Value)
-                            cmluck.luck = -cmluck.luck;
-                        DropChance += cmluck.luck;
-                    }
-                    for (TotalDrops = 0; DropChance > 100; TotalDrops++)
-                        DropChance -= 100;
-
-                    bool changepickup = false;
-                    if (inventory.GetItemCount(HerBurden.itemIndex) > 0 || inventory.GetItemCount(HerRecluse.itemIndex) > 0 || inventory.GetItemCount(HerFury.itemIndex) > 0 || inventory.GetItemCount(HerTorpor.itemIndex) > 0 || inventory.GetItemCount(HerRancor.itemIndex) > 0 || inventory.GetItemCount(HerPanic.itemIndex) > 0)
-                        changepickup = true;
-                    bool blacklist = false;
-                    if (self.pickupIndex == PickupCatalog.FindPickupIndex(HerBurden.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(HerRecluse.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(HerFury.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(HerTorpor.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(HerRancor.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(HerPanic.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ScrapWhite.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ScrapGreen.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ScrapRed.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ScrapYellow.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ArtifactKey.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.LunarTrinket.itemIndex))
-                        blacklist = true;
-                    if (!blacklist && GiveOriginalItem.Value)
-                        if (self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.Pearl.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ShinyPearl.itemIndex))
-                            blacklist = true;
-
-                    if (Util.CheckRoll(DropChance))
-                        TotalDrops++;
-                    if (changepickup == true && TotalDrops > 0 && blacklist == false)
-                    {
-                        if (ItemCatalog.GetItemDef(PickupCatalog.GetPickupDef(self.pickupIndex).itemIndex).tier == ItemTier.Tier2)
-                            TotalDrops += 1;
-                        else if (ItemCatalog.GetItemDef(PickupCatalog.GetPickupDef(self.pickupIndex).itemIndex).tier == ItemTier.Tier3)
-                            TotalDrops += 4;
-                        if (GiveOriginalItem.Value)
-                            orig(self, body, inventory);
-                        for (int x = TotalDrops; x > 0; x--)
-                        {
-                            switch (Mathf.FloorToInt(UnityRandom.Range(0, 6)))
-                            {
-                                case 0:
-                                    self.pickupIndex = PickupCatalog.FindPickupIndex(HerBurden.itemIndex);
-                                    break;
-                                case 1:
-                                    self.pickupIndex = PickupCatalog.FindPickupIndex(HerRecluse.itemIndex);
-                                    break;
-                                case 2:
-                                    self.pickupIndex = PickupCatalog.FindPickupIndex(HerFury.itemIndex);
-                                    break;
-                                case 3:
-                                    self.pickupIndex = PickupCatalog.FindPickupIndex(HerTorpor.itemIndex);
-                                    break;
-                                case 4:
-                                    self.pickupIndex = PickupCatalog.FindPickupIndex(HerRancor.itemIndex);
-                                    break;
-                                case 5:
-                                    self.pickupIndex = PickupCatalog.FindPickupIndex(HerPanic.itemIndex);
-                                    break;
-                            }
-                            orig(self, body, inventory);
-                        }
-
-                        //Handle the size change with scripts
-                        Size(1, body, false);
-                        Size(2, body, false);
-                        return;
-                    }
-                }
-
-                orig(self, body, inventory);
-
-                //Handle the size change with scripts
-                Size(1, body, false);
-                Size(2, body, false);
-            };
-
             IL.RoR2.ItemCatalog.SetItemDefs += (il) =>
             {
                 var c = new ILCursor(il);
@@ -272,15 +171,127 @@ namespace Crystal_Burden
             On.EntityStates.Duplicator.Duplicating.OnEnter += Duplicating_OnEnter;
             On.RoR2.EquipmentSlot.PerformEquipmentAction += EquipmentSlot_PerformEquipmentAction;
             GlobalEventManager.onCharacterDeathGlobal += GlobalEventManager_onCharacterDeathGlobal;
-            On.RoR2.PickupDropletController.CreatePickupDroplet += PickupDropletController_CreatePickupDroplet;
+            On.RoR2.PickupDropletController.CreatePickupDroplet_CreatePickupInfo_Vector3_Vector3 += PickupDropletController_CreatePickupDroplet_CreatePickupInfo_Vector3_Vector3;
             On.RoR2.CharacterMaster.RespawnExtraLife += CharacterMaster_RespawnExtraLife;
             On.RoR2.PickupPickerController.SetOptionsFromPickupForCommandArtifact += PickupPickerController_SetOptionsFromPickupForCommandArtifact;
-            On.RoR2.GenericPickupController.GrantEquipment += GenericPickupController_GrantEquipment;
             On.RoR2.CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper.Init += LunarItemOrEquipmentCostTypeHelper_Init;
             if (BodyBlend)
                 On.RoR2.CharacterBody.Update += UpdateBodyBlend;
             On.RoR2.Inventory.GiveItem_ItemIndex_int += Inventory_GiveItem_ItemIndex_int;
             On.RoR2.Inventory.RemoveItem_ItemIndex_int += Inventory_RemoveItem_ItemIndex_int;
+            On.RoR2.ItemDef.AttemptGrant += ItemDef_AttemptGrant;
+        }
+
+        private void ItemDef_AttemptGrant(On.RoR2.ItemDef.orig_AttemptGrant orig, ref PickupDef.GrantContext context)
+        {
+            CharacterBody body = context.body;
+            Inventory inventory = body.inventory;
+            GenericPickupController self = context.controller;
+            context.shouldNotify = false;
+            PickupIndex originalItem = self.pickupIndex;
+
+            if (RunArtifactManager.instance.IsArtifactEnabled(HerCurse))
+            {
+                orig(ref context);
+
+                //Handle the size change with scripts
+                Size(1, body, false);
+                Size(2, body, false);
+                return;
+            }
+
+            if (ToggleDebuffs.Value)
+            {
+                int TotalDrops;
+                float DropChance = ChanceChangePickup.Value;
+                int VariantCount = inventory.GetItemCount(HerBurden.itemIndex) + inventory.GetItemCount(HerRecluse.itemIndex) + inventory.GetItemCount(HerFury.itemIndex) + inventory.GetItemCount(HerTorpor.itemIndex) + inventory.GetItemCount(HerRancor.itemIndex) + inventory.GetItemCount(HerPanic.itemIndex);
+
+                float TempMaxOverflow = VariantCount - LimitDecreaseItemDropPercentage.Value;
+                if (TempMaxOverflow < 0)
+                    TempMaxOverflow = 0;
+
+                if (DropChance > MinimumDropChance.Value && VariantCount > LimitDecreaseItemDropPercentage.Value)
+                {
+                    DropChance *= Mathf.Pow(DecreaseItemDropPercentage.Value, TempMaxOverflow);
+                    if (DropChance < MinimumDropChance.Value)
+                        DropChance = MinimumDropChance.Value;
+                }
+
+                CharacterMaster cmluck = new CharacterMaster();
+                cmluck.luck = inventory.GetComponent<CharacterMaster>().luck;
+                if (LuckEffect.Value)
+                {
+                    if (LuckInverseEffect.Value)
+                        cmluck.luck = -cmluck.luck;
+                    DropChance += cmluck.luck;
+                }
+                for (TotalDrops = 0; DropChance > 100; TotalDrops++)
+                    DropChance -= 100;
+
+                bool changepickup = false;
+                if (inventory.GetItemCount(HerBurden.itemIndex) > 0 || inventory.GetItemCount(HerRecluse.itemIndex) > 0 || inventory.GetItemCount(HerFury.itemIndex) > 0 || inventory.GetItemCount(HerTorpor.itemIndex) > 0 || inventory.GetItemCount(HerRancor.itemIndex) > 0 || inventory.GetItemCount(HerPanic.itemIndex) > 0)
+                    changepickup = true;
+                bool blacklist = false;
+                if (self.pickupIndex == PickupCatalog.FindPickupIndex(HerBurden.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(HerRecluse.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(HerFury.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(HerTorpor.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(HerRancor.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(HerPanic.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ScrapWhite.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ScrapGreen.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ScrapRed.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ScrapYellow.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ArtifactKey.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.LunarTrinket.itemIndex))
+                    blacklist = true;
+                if (!blacklist && GiveOriginalItem.Value)
+                    if (self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.Pearl.itemIndex) || self.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ShinyPearl.itemIndex))
+                        blacklist = true;
+
+                if (Util.CheckRoll(DropChance))
+                    TotalDrops++;
+                if (changepickup == true && TotalDrops > 0 && blacklist == false)
+                {
+                    if (ItemCatalog.GetItemDef(PickupCatalog.GetPickupDef(self.pickupIndex).itemIndex).tier == ItemTier.Tier2)
+                        TotalDrops += 1;
+                    else if (ItemCatalog.GetItemDef(PickupCatalog.GetPickupDef(self.pickupIndex).itemIndex).tier == ItemTier.Tier3)
+                        TotalDrops += 4;
+                    if (GiveOriginalItem.Value)
+                    {
+                        orig(ref context);
+                        GenericPickupController.SendPickupMessage(body.master, self.pickupIndex);
+                    }
+                    for (int x = TotalDrops; x > 0; x--)
+                    {
+                        switch (Mathf.FloorToInt(UnityRandom.Range(0, 6)))
+                        {
+                            case 0:
+                                self.pickupIndex = PickupCatalog.FindPickupIndex(HerBurden.itemIndex);
+                                break;
+                            case 1:
+                                self.pickupIndex = PickupCatalog.FindPickupIndex(HerRecluse.itemIndex);
+                                break;
+                            case 2:
+                                self.pickupIndex = PickupCatalog.FindPickupIndex(HerFury.itemIndex);
+                                break;
+                            case 3:
+                                self.pickupIndex = PickupCatalog.FindPickupIndex(HerTorpor.itemIndex);
+                                break;
+                            case 4:
+                                self.pickupIndex = PickupCatalog.FindPickupIndex(HerRancor.itemIndex);
+                                break;
+                            case 5:
+                                self.pickupIndex = PickupCatalog.FindPickupIndex(HerPanic.itemIndex);
+                                break;
+                        }
+                        orig(ref context);
+                        //GenericPickupController.SendPickupMessage(body.master, self.pickupIndex);
+                        CharacterMasterNotificationQueue.PushItemTransformNotification(body.master, PickupCatalog.GetPickupDef(originalItem).itemIndex, PickupCatalog.GetPickupDef(self.pickupIndex).itemIndex, CharacterMasterNotificationQueue.TransformationType.Suppressed);
+                    }
+
+                    //Handle the size change with scripts
+                    Size(1, body, false);
+                    Size(2, body, false);
+                    context.shouldNotify = false;
+                    return;
+                }
+            }
+
+            orig(ref context);
+
+            //Handle the size change with scripts
+            Size(1, body, false);
+            Size(2, body, false);
         }
 
         private void Inventory_RemoveItem_ItemIndex_int(On.RoR2.Inventory.orig_RemoveItem_ItemIndex_int orig, Inventory self, ItemIndex itemIndex, int count)
@@ -376,15 +387,6 @@ namespace Crystal_Burden
             temp2.Remove(HerRancor.itemIndex);
             temp2.Remove(HerPanic.itemIndex);
             CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper.lunarItemIndices = temp2.ToArray();
-        }
-
-        private void GenericPickupController_GrantEquipment(On.RoR2.GenericPickupController.orig_GrantEquipment orig, GenericPickupController self, CharacterBody body, Inventory inventory)
-        {
-            if (self.pickupIndex == PickupCatalog.FindPickupIndex(HerGamble.equipmentIndex) && inventory.GetItemCount(HGEquipmentDisplay) == 0)
-                inventory.GiveItem(HGEquipmentDisplay);
-            if (self.pickupIndex != PickupCatalog.FindPickupIndex(HerGamble.equipmentIndex) && inventory.GetItemCount(HGEquipmentDisplay) != 0)
-                inventory.RemoveItem(HGEquipmentDisplay);
-            orig(self, body, inventory);
         }
 
         private void PickupPickerController_SetOptionsFromPickupForCommandArtifact(On.RoR2.PickupPickerController.orig_SetOptionsFromPickupForCommandArtifact orig, PickupPickerController self, PickupIndex pickupIndex)
@@ -500,20 +502,20 @@ namespace Crystal_Burden
             }
         }
 
-        private void PickupDropletController_CreatePickupDroplet(On.RoR2.PickupDropletController.orig_CreatePickupDroplet orig, PickupIndex pickupIndex, Vector3 position, Vector3 velocity)
+        private void PickupDropletController_CreatePickupDroplet_CreatePickupInfo_Vector3_Vector3(On.RoR2.PickupDropletController.orig_CreatePickupDroplet_CreatePickupInfo_Vector3_Vector3 orig, GenericPickupController.CreatePickupInfo pickupInfo, Vector3 position, Vector3 velocity)
         {
-            if (RunArtifactManager.instance.IsArtifactEnabled(HerCurse) && PickupCatalog.GetPickupDef(pickupIndex).equipmentIndex != EquipmentIndex.None && pickupIndex != PickupCatalog.FindPickupIndex(HerGamble.equipmentIndex))
+            if (RunArtifactManager.instance.IsArtifactEnabled(HerCurse) && PickupCatalog.GetPickupDef(pickupInfo.pickupIndex).equipmentIndex != EquipmentIndex.None && pickupInfo.pickupIndex != PickupCatalog.FindPickupIndex(HerGamble.equipmentIndex))
             {
                 PickupDropletController.CreatePickupDroplet(PickupCatalog.FindPickupIndex(HerGamble.equipmentIndex), position, velocity);
                 return;
             }
             bool burdenvariant = false;
-            if (PickupCatalog.GetPickupDef(pickupIndex).itemIndex != ItemIndex.None && ItemCatalog.GetItemDef(PickupCatalog.GetPickupDef(pickupIndex).itemIndex).ContainsTag((ItemTag)19))
+            if (PickupCatalog.GetPickupDef(pickupInfo.pickupIndex).itemIndex != ItemIndex.None && ItemCatalog.GetItemDef(PickupCatalog.GetPickupDef(pickupInfo.pickupIndex).itemIndex).ContainsTag((ItemTag)19))
                 burdenvariant = true;
             bool blacklist = false;
-            if (pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ArtifactKey.itemIndex) || pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.LunarTrinket.itemIndex))
+            if (pickupInfo.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ArtifactKey.itemIndex) || pickupInfo.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.LunarTrinket.itemIndex))
                 blacklist = true;
-            if (RunArtifactManager.instance.IsArtifactEnabled(HerCurse) && PickupCatalog.GetPickupDef(pickupIndex).itemIndex != ItemIndex.None && !burdenvariant && VariantDropCount.Value && !blacklist)
+            if (RunArtifactManager.instance.IsArtifactEnabled(HerCurse) && PickupCatalog.GetPickupDef(pickupInfo.pickupIndex).itemIndex != ItemIndex.None && !burdenvariant && VariantDropCount.Value && !blacklist)
             {
                 switch (Mathf.FloorToInt(UnityRandom.Range(0, 6)))
                 {
@@ -538,17 +540,17 @@ namespace Crystal_Burden
                 }
                 return;
             }
-            if (RunArtifactManager.instance.IsArtifactEnabled(HerCurse) && PickupCatalog.GetPickupDef(pickupIndex).itemIndex != ItemIndex.None && !burdenvariant && !VariantDropCount.Value && !blacklist)
+            if (RunArtifactManager.instance.IsArtifactEnabled(HerCurse) && PickupCatalog.GetPickupDef(pickupInfo.pickupIndex).itemIndex != ItemIndex.None && !burdenvariant && !VariantDropCount.Value && !blacklist)
             {
                 PickupDropletController.CreatePickupDroplet(PickupCatalog.FindPickupIndex(HerBurden.itemIndex), position, velocity);
                 return;
             }
-            if (pickupIndex == PickupCatalog.FindPickupIndex(HerBurden.itemIndex) && !VariantDropCount.Value)
+            if (pickupInfo.pickupIndex == PickupCatalog.FindPickupIndex(HerBurden.itemIndex) && !VariantDropCount.Value)
             {
                 switch (Mathf.FloorToInt(UnityRandom.Range(0, 6)))
                 {
                     case 0:
-                        orig(pickupIndex, position, velocity);
+                        orig(pickupInfo, position, velocity);
                         break;
                     case 1:
                         PickupDropletController.CreatePickupDroplet(PickupCatalog.FindPickupIndex(HerRecluse.itemIndex), position, velocity);
@@ -568,7 +570,7 @@ namespace Crystal_Burden
                 }
                 return;
             }
-            orig(pickupIndex, position, velocity);
+            orig(pickupInfo, position, velocity);
         }
 
         private static void GlobalEventManager_onCharacterDeathGlobal(DamageReport report)
