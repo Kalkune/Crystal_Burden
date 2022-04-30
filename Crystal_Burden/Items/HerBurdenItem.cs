@@ -13,9 +13,6 @@ namespace Crystal_Burden
 {
     class HerBurdenItem : Crystal_Burden
     {
-        private static String HERBURDEN_PICKUP;
-        private static String HERBURDEN_DESC;
-        private static String HERBURDEN_LORE;
         private static String tier = "";
         public static void Init()
         {
@@ -25,25 +22,17 @@ namespace Crystal_Burden
             else
                 tier = "Lunar";
             HerBurden = ScriptableObject.CreateInstance<ItemDef>();
-            if (Nsfw?.Value ?? false)
-            {
-                HerBurden.name = "HERBURDEN";
-                HerBurden.nameToken = "Her Burden";
-            }
-            else if (!Nsfw?.Value ?? true)
-            {
-                HerBurden.name = "HERBURDEN";
-                HerBurden.nameToken = "Crystal Burden";
-            }
             AddTokens();
-            HerBurden.pickupToken = HERBURDEN_PICKUP;
-            HerBurden.descriptionToken = HERBURDEN_DESC;
-            HerBurden.loreToken = HERBURDEN_LORE;
-            HerBurden.tier = Hbtier;
+            HerBurden.name = "HERBURDEN";
+            HerBurden.nameToken = "HERBURDEN_NAME";
+            HerBurden.pickupToken = "HERBURDEN_PICKUP";
+            HerBurden.descriptionToken = "HERBURDEN_DESC";
+            HerBurden.loreToken = "HERBURDEN_LORE";
+            HerBurden.deprecatedTier = Hbtier;
             if (Nsfw?.Value ?? false)
                 HerBurden.pickupIconSprite = Crystal_Burden.bundle.LoadAsset<Sprite>(Artist.Value + "ItemIcon");
             else if (!Nsfw?.Value ?? true)
-                HerBurden.pickupIconSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("Brdn_Crystal_Burden"+tier+"ItemIcon");
+                HerBurden.pickupIconSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("Brdn_Crystal_Burden" + tier + "ItemIcon");
             if (Nsfw?.Value ?? false)
                 HerBurden.pickupModelPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>(Artist.Value + "her_burden");
             else if (!Nsfw?.Value ?? true)
@@ -58,17 +47,21 @@ namespace Crystal_Burden
         }
         private static void AddTokens()
         {
+            if (Nsfw?.Value ?? false)
+                Languages.AddTokenString("HERBURDEN_NAME", "Her Burden");
+            else if (!Nsfw?.Value ?? true)
+                Languages.AddTokenString("HERBURDEN_NAME" ,"Crystal Burden");
             if (ToggleDebuffs.Value)
             {
-                HERBURDEN_PICKUP = "Increase HP and decrease move speed.\nAll item drops are now variants of: <color=#307FFF>" + HerBurden.nameToken + "</color>";
-                HERBURDEN_DESC = $"Increase HP by {Hbbv}% and decrease move speed by {Hbdbv}%.\nAll item drops are now variants of: <color=#307FFF>" + HerBurden.nameToken + "</color>";
+                Languages.AddTokenString("HERBURDEN_PICKUP", "Increase HP and decrease move speed.\nAll item drops are now variants of: <color=#307FFF>" + HerBurden.nameToken + "</color>");
+                Languages.AddTokenString("HERBURDEN_DESC", $"Increase HP by {Hbbv}% and decrease move speed by {Hbdbv}%.\nAll item drops are now variants of: <color=#307FFF>" + HerBurden.nameToken + "</color>");
             }
             if (!ToggleDebuffs.Value)
             {
-                HERBURDEN_PICKUP = "Increase HP.\nMonsters now have a chance to drop variants of: <color=#e7553b>" + HerBurden.nameToken + "</color>";
-                HERBURDEN_DESC = $"Increase HP by {Hbbv}%.\nMonsters now have a chance to drop variants of: <color=#e7553b>" + HerBurden.nameToken + "</color>";
+                Languages.AddTokenString("HERBURDEN_PICKUP", "Increase HP.\nMonsters now have a chance to drop variants of: <color=#e7553b>" + HerBurden.nameToken + "</color>");
+                Languages.AddTokenString("HERBURDEN_DESC", $"Increase HP by {Hbbv}%.\nMonsters now have a chance to drop variants of: <color=#e7553b>" + HerBurden.nameToken + "</color>");
             }
-            HERBURDEN_LORE = "None";
+            Languages.AddTokenString("HERBURDEN_LORE", "None");
 
         }
         public static void AddLocation(ItemDisplays.CharacterItemDisplayRuleSet rules)
@@ -247,6 +240,26 @@ namespace Crystal_Burden
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
+                    childName = "Pelvis",
+                    localPos = new Vector3(0f, 0.25f, 0.1f),
+                    localAngles = new Vector3(0f, 180f, 180f),
+                    localScale = generalScale
+                }, "mdlRailGunner"
+                );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "Pelvis",
+                    localPos = new Vector3(0f, 0.30f, 0f),
+                    localAngles = new Vector3(45f, 90f, 180f),
+                    localScale = generalScale
+                }, "mdlVoidSurvivor"
+                );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
                     childName = "HandR",
                     localPos = new Vector3(0.005f, -0.0075f, 0f),
                     localAngles = new Vector3(45f, -4f, 0f),
@@ -390,6 +403,26 @@ namespace Crystal_Burden
                     localAngles = new Vector3(-90f, 90f, 0f),
                     localScale = generalScale
                 }, "mdlHeretic"
+                );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "Chest",
+                    localPos = new Vector3(-0.16f, 0.19f, -0.02f),
+                    localAngles = new Vector3(0f, 0f, 0f),
+                    localScale = generalScale
+                }, "mdlRailGunner"
+                );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "Chest",
+                    localPos = new Vector3(-0.25f, 0.125f, -0.2f),
+                    localAngles = new Vector3(-140f, -165f, -175f),
+                    localScale = generalScale
+                }, "mdlVoidSurvivor"
                 );
                 rules.AddCharacterModelRule(new ItemDisplayRule
                 {

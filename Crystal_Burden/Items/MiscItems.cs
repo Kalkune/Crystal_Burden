@@ -15,8 +15,8 @@ namespace Crystal_Burden
         {
             HBItemPicker = ScriptableObject.CreateInstance<ItemDef>();
             HBItemPicker.name = "HBITEMPICKER";
-            HBItemPicker.nameToken = "HB Item Picker";
-            HBItemPicker.tier = ItemTier.NoTier;
+            HBItemPicker.AutoPopulateTokens();
+            HBItemPicker.deprecatedTier = ItemTier.NoTier;
             HBItemPicker.hidden = true;
             Items.Add(HBItemPicker, null);
         }

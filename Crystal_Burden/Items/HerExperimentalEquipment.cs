@@ -13,9 +13,6 @@ namespace Crystal_Burden
 {
     class HerGambleEquipment : Crystal_Burden
     {
-        private static String HERGAMBLE_PICKUP;
-        private static String HERGAMBLE_DESC;
-        private static String HERGAMBLE_LORE;
         private static String tier = "";
         public static void Init()
         {
@@ -24,21 +21,13 @@ namespace Crystal_Burden
                 Hgcolor = ColorCatalog.ColorIndex.Equipment;
             else
                 tier = "Lunar";
-            AddTokens();
             HerGamble = ScriptableObject.CreateInstance<EquipmentDef>();
-            if (Nsfw?.Value ?? false)
-            {
-                HerGamble.name = "HERGAMBLE";
-                HerGamble.nameToken = "Her Gamble";
-            }
-            else if (!Nsfw?.Value ?? true)
-            {
-                HerGamble.name = "HERGAMBLE";
-                HerGamble.nameToken = "Crystal Gamble";
-            }
-            HerGamble.pickupToken = HERGAMBLE_PICKUP;
-            HerGamble.descriptionToken = HERGAMBLE_DESC;
-            HerGamble.loreToken = HERGAMBLE_LORE;
+            AddTokens();
+            HerGamble.name = "HERGAMBLE";
+            HerGamble.nameToken = "HERGAMBLE_NAME";
+            HerGamble.pickupToken = "HERGAMBLE_PICKUP";
+            HerGamble.descriptionToken = "HERGAMBLE_DESC";
+            HerGamble.loreToken = "HERGAMBLE_LORE";
             HerGamble.isLunar = ToggleDebuffs.Value;
             HerGamble.colorIndex = Hgcolor;
             if (Nsfw?.Value ?? false)
@@ -72,17 +61,21 @@ namespace Crystal_Burden
         }
         private static void AddTokens()
         {
+            if (Nsfw?.Value ?? false)
+                Languages.AddTokenString("HERGAMBLE_NAME", "Her Gamble");
+            else if (!Nsfw?.Value ?? true)
+                Languages.AddTokenString("HERGAMBLE_NAME", "Crystal Gamble");
             if (ToggleDebuffs.Value)
             {
-                HERGAMBLE_PICKUP = "An equipment that gambles your stats";
-                HERGAMBLE_DESC = "An equipment that gambles your stats that come from " + HerBurden.nameToken + " Variants";
+                Languages.AddTokenString("HERGAMBLE_PICKUP", "An equipment that gambles your stats");
+                Languages.AddTokenString("HERGAMBLE_DESC", "An equipment that gambles your stats that come from " + HerBurden.nameToken + " Variants");
             }
             if (!ToggleDebuffs.Value)
             {
-                HERGAMBLE_PICKUP = "Has a chance to double your stats";
-                HERGAMBLE_DESC = "Has a chance to double your stats that come from " + HerBurden.nameToken + " Variants";
+                Languages.AddTokenString("HERGAMBLE_PICKUP", "Has a chance to double your stats");
+                Languages.AddTokenString("HERGAMBLE_DESC", "Has a chance to double your stats that come from " + HerBurden.nameToken + " Variants");
             }
-            HERGAMBLE_LORE = "None";
+            Languages.AddTokenString("HERGAMBLE_LORE", "None");
 
         }
         public static void AddLocation(ItemDisplays.CharacterItemDisplayRuleSet rules)
@@ -245,6 +238,36 @@ namespace Crystal_Burden
                     localScale = generalScale * 2
                 }, "mdlHeretic"
                 );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "ThighR",
+                    localPos = new Vector3(-0.015f, -0.02f, 0.11f),
+                    localAngles = new Vector3(47.5f, 170f, 180f),
+                    localScale = generalScale
+                }, "mdlRailGunner"
+                );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "ThighR",
+                    localPos = new Vector3(-0.05f, 0.1f, -0.115f),
+                    localAngles = new Vector3(40f, 10f, 180f),
+                    localScale = generalScale
+                }, "mdlVoidSurvivor"
+                );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "ThighR",
+                    localPos = new Vector3(0.15f, 0.5f, 0.8f),
+                    localAngles = new Vector3(45f, -170f, -170f),
+                    localScale = generalScale * 0.25f
+                }, "mdlMEL-T2"
+                );
             }
             if (ItemVisibility.Value && (!Nsfw?.Value ?? true))
             {
@@ -378,6 +401,26 @@ namespace Crystal_Burden
                     localAngles = new Vector3(90f, 0f, 0f),
                     localScale = generalScale * 2
                 }, "mdlHeretic"
+                );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "Chest",
+                    localPos = new Vector3(0f, 0.075f, 0f),
+                    localAngles = new Vector3(0f, 0f, 0f),
+                    localScale = generalScale
+                }, "mdlRailGunner"
+                );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "Chest",
+                    localPos = new Vector3(0f, 0.075f, 0f),
+                    localAngles = new Vector3(0f, 0f, 0f),
+                    localScale = generalScale
+                }, "mdlVoidSurvivor"
                 );
                 rules.AddCharacterModelRule(new ItemDisplayRule
                 {

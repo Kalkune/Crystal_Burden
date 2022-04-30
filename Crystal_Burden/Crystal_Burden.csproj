@@ -45,13 +45,16 @@
     <Reference Include="BodyBlend">
       <HintPath>..\..\ahope\BodyBlend.dll</HintPath>
     </Reference>
-    <Reference Include="com.unity.multiplayer-hlapi.Runtime">
+    <Reference Include="com.unity.multiplayer-hlapi.Runtime, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\ahope\stubs\com.unity.multiplayer-hlapi.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="HGCSharpUtils">
-      <HintPath>..\..\ahope\HGCSharpUtils.dll</HintPath>
+    <Reference Include="HGCSharpUtils, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\ahope\stubs\HGCSharpUtils.dll</HintPath>
     </Reference>
-    <Reference Include="LegacyResourcesAPI">
+    <Reference Include="LegacyResourcesAPI, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\ahope\stubs\LegacyResourcesAPI.dll</HintPath>
     </Reference>
     <Reference Include="MMHOOK_RoR2">
@@ -66,7 +69,8 @@
     <Reference Include="MonoMod.Utils">
       <HintPath>..\..\ahope\MonoMod.Utils.dll</HintPath>
     </Reference>
-    <Reference Include="RoR2">
+    <Reference Include="RoR2, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\ahope\stubs\RoR2.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">

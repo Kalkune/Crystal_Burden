@@ -17,6 +17,7 @@ using System.Security;
 using System.Security.Permissions;
 using RoR2.ContentManagement;
 using System.Linq;
+using MonoMod.RuntimeDetour;
 
 [module: UnverifiableCode]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -26,7 +27,7 @@ namespace Crystal_Burden
     [BepInDependency("com.xoxfaby.BetterAPI", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("com.OkIgotIt.Her_Burden", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("com.Maiesen.BodyBlend", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.Kalkune.Crystal_Burden", "Crystal_Burden", "1.5.3")]
+    [BepInPlugin("com.Kalkune.Crystal_Burden", "Crystal_Burden", "1.5.4")]
 
     public class Crystal_Burden : BaseUnityPlugin
     {
@@ -166,23 +167,21 @@ namespace Crystal_Burden
             };
 
             WhoKnows();
-            On.RoR2.CharacterBody.Update += CharacterBody_Update;
-            On.RoR2.CharacterMaster.OnBodyStart += CharacterMaster_OnBodyStart;
-            On.EntityStates.Duplicator.Duplicating.OnEnter += Duplicating_OnEnter;
-            On.RoR2.EquipmentSlot.PerformEquipmentAction += EquipmentSlot_PerformEquipmentAction;
+            Hook CharacterBodyUpdate = new Hook(typeof(CharacterBody).GetMethod("Update", BindingFlags.Public | BindingFlags.Instance), typeof(Crystal_Burden).GetMethod("CharacterBody_Update"));
+            Hook CharacterMasterOnBodyStart = new Hook(typeof(CharacterMaster).GetMethod("OnBodyStart", BindingFlags.Public | BindingFlags.Instance), typeof(Crystal_Burden).GetMethod("CharacterMaster_OnBodyStart"));
+            Hook DuplicatingOnEnter = new Hook(typeof(EntityStates.Duplicator.Duplicating).GetMethod("OnEnter", BindingFlags.Public | BindingFlags.Instance), typeof(Crystal_Burden).GetMethod("Duplicating_OnEnter"));
+            Hook EquipmentSlotPerformEquipmentAction = new Hook(typeof(EquipmentSlot).GetMethod("PerformEquipmentAction", BindingFlags.NonPublic | BindingFlags.Instance), typeof(Crystal_Burden).GetMethod("EquipmentSlot_PerformEquipmentAction"));
             GlobalEventManager.onCharacterDeathGlobal += GlobalEventManager_onCharacterDeathGlobal;
-            On.RoR2.PickupDropletController.CreatePickupDroplet_CreatePickupInfo_Vector3_Vector3 += PickupDropletController_CreatePickupDroplet_CreatePickupInfo_Vector3_Vector3;
-            On.RoR2.CharacterMaster.RespawnExtraLife += CharacterMaster_RespawnExtraLife;
-            On.RoR2.PickupPickerController.SetOptionsFromPickupForCommandArtifact += PickupPickerController_SetOptionsFromPickupForCommandArtifact;
-            On.RoR2.CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper.Init += LunarItemOrEquipmentCostTypeHelper_Init;
-            if (BodyBlend)
-                On.RoR2.CharacterBody.Update += UpdateBodyBlend;
-            On.RoR2.Inventory.GiveItem_ItemIndex_int += Inventory_GiveItem_ItemIndex_int;
-            On.RoR2.Inventory.RemoveItem_ItemIndex_int += Inventory_RemoveItem_ItemIndex_int;
-            On.RoR2.ItemDef.AttemptGrant += ItemDef_AttemptGrant;
+            Hook PickupDropletControllerCreatePickupDroplet_CreatePickupInfo_Vector3_Vector3 = new Hook(typeof(PickupDropletController).GetMethod("CreatePickupDroplet", new Type[] { typeof(GenericPickupController.CreatePickupInfo), typeof(Vector3), typeof(Vector3) }), typeof(Crystal_Burden).GetMethod("PickupDropletController_CreatePickupDroplet_CreatePickupInfo_Vector3_Vector3"));
+            Hook CharacterMasterRespawnExtraLife = new Hook(typeof(CharacterMaster).GetMethod("RespawnExtraLife", BindingFlags.Public | BindingFlags.Instance), typeof(Crystal_Burden).GetMethod("CharacterMaster_RespawnExtraLife"));
+            Hook PickupPickerControllerSetOptionsFromPickupForCommandArtifact = new Hook(typeof(PickupPickerController).GetMethod("SetOptionsFromPickupForCommandArtifact", BindingFlags.Public | BindingFlags.Instance), typeof(Crystal_Burden).GetMethod("PickupPickerController_SetOptionsFromPickupForCommandArtifact"));
+            Hook CostTypeCatalogLunarItemOrEquipmentCostTypeHelper = new Hook(typeof(CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper).GetMethod("Init", BindingFlags.NonPublic | BindingFlags.Static), typeof(Crystal_Burden).GetMethod("LunarItemOrEquipmentCostTypeHelper_Init"));
+            Hook InventoryGiveItem_ItemIndex_int = new Hook(typeof(Inventory).GetMethod("GiveItem", new Type[] { typeof(ItemIndex), typeof(int) }), typeof(Crystal_Burden).GetMethod("Inventory_GiveItem_ItemIndex_int"));
+            Hook InventoryRemoveItem_ItemIndex_int = new Hook(typeof(Inventory).GetMethod("RemoveItem", new Type[] { typeof(ItemIndex), typeof(int) }), typeof(Crystal_Burden).GetMethod("Inventory_RemoveItem_ItemIndex_int"));
+            Hook ItemDefAttemptGrant = new Hook(typeof(ItemDef).GetMethod("AttemptGrant"), typeof(Crystal_Burden).GetMethod("ItemDef_AttemptGrant"));
         }
 
-        private void ItemDef_AttemptGrant(On.RoR2.ItemDef.orig_AttemptGrant orig, ref PickupDef.GrantContext context)
+        public static void ItemDef_AttemptGrant(On.RoR2.ItemDef.orig_AttemptGrant orig, ref PickupDef.GrantContext context)
         {
             CharacterBody body = context.body;
             Inventory inventory = body.inventory;
@@ -294,7 +293,7 @@ namespace Crystal_Burden
             Size(2, body, false);
         }
 
-        private void Inventory_RemoveItem_ItemIndex_int(On.RoR2.Inventory.orig_RemoveItem_ItemIndex_int orig, Inventory self, ItemIndex itemIndex, int count)
+        public static void Inventory_RemoveItem_ItemIndex_int(Action<Inventory, ItemIndex, int> orig, Inventory self, ItemIndex itemIndex, int count)
         {
 
             CharacterMaster master = self.gameObject.GetComponent<CharacterMaster>();
@@ -337,7 +336,7 @@ namespace Crystal_Burden
                 Size(4, body, true);
         }
 
-        private void Inventory_GiveItem_ItemIndex_int(On.RoR2.Inventory.orig_GiveItem_ItemIndex_int orig, Inventory self, ItemIndex itemIndex, int count)
+        public static void Inventory_GiveItem_ItemIndex_int(Action<Inventory, ItemIndex, int> orig, Inventory self, ItemIndex itemIndex, int count)
         {
             orig(self, itemIndex, count);
 
@@ -350,9 +349,8 @@ namespace Crystal_Burden
             Size(2, body, false);
         }
 
-        private void UpdateBodyBlend(On.RoR2.CharacterBody.orig_Update orig, CharacterBody self)
+        public static void UpdateBodyBlend(CharacterBody self)
         {
-            orig(self);
             if (!Nsfw?.Value ?? true)
                 return;
             if (self?.modelLocator?.modelTransform?.gameObject == null)
@@ -375,7 +373,7 @@ namespace Crystal_Burden
                 self.SetBlendValue("Breasts", 0f, "Burden");
         }
 
-        private void LunarItemOrEquipmentCostTypeHelper_Init(On.RoR2.CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper.orig_Init orig)
+        public static void LunarItemOrEquipmentCostTypeHelper_Init(Action orig)
         {
             orig();
             ItemIndex[] temp = CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper.lunarItemIndices;
@@ -389,7 +387,7 @@ namespace Crystal_Burden
             CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper.lunarItemIndices = temp2.ToArray();
         }
 
-        private void PickupPickerController_SetOptionsFromPickupForCommandArtifact(On.RoR2.PickupPickerController.orig_SetOptionsFromPickupForCommandArtifact orig, PickupPickerController self, PickupIndex pickupIndex)
+        public static void PickupPickerController_SetOptionsFromPickupForCommandArtifact(Action<PickupPickerController, PickupIndex> orig, PickupPickerController self, PickupIndex pickupIndex)
         {
             orig(self, pickupIndex);
             if (pickupIndex == PickupCatalog.FindPickupIndex(HBItemPicker.itemIndex))
@@ -488,7 +486,7 @@ namespace Crystal_Burden
             addContentPackProvider(new Content());
         }
 
-        private void CharacterMaster_RespawnExtraLife(On.RoR2.CharacterMaster.orig_RespawnExtraLife orig, CharacterMaster self)
+        public static void CharacterMaster_RespawnExtraLife(Action<CharacterMaster> orig, CharacterMaster self)
         {
             CharacterBody body = self.GetBody();
             Size(3, body, true);
@@ -502,7 +500,7 @@ namespace Crystal_Burden
             }
         }
 
-        private void PickupDropletController_CreatePickupDroplet_CreatePickupInfo_Vector3_Vector3(On.RoR2.PickupDropletController.orig_CreatePickupDroplet_CreatePickupInfo_Vector3_Vector3 orig, GenericPickupController.CreatePickupInfo pickupInfo, Vector3 position, Vector3 velocity)
+        public static void PickupDropletController_CreatePickupDroplet_CreatePickupInfo_Vector3_Vector3(Action<GenericPickupController.CreatePickupInfo, Vector3, Vector3> orig, GenericPickupController.CreatePickupInfo pickupInfo, Vector3 position, Vector3 velocity)
         {
             if (RunArtifactManager.instance.IsArtifactEnabled(HerCurse) && PickupCatalog.GetPickupDef(pickupInfo.pickupIndex).equipmentIndex != EquipmentIndex.None && pickupInfo.pickupIndex != PickupCatalog.FindPickupIndex(HerGamble.equipmentIndex))
             {
@@ -637,7 +635,7 @@ namespace Crystal_Burden
             }
         }
 
-        private bool EquipmentSlot_PerformEquipmentAction(On.RoR2.EquipmentSlot.orig_PerformEquipmentAction orig, EquipmentSlot self, EquipmentDef equipmentDef)
+        public static bool EquipmentSlot_PerformEquipmentAction(Func<EquipmentSlot, EquipmentDef, bool> orig, EquipmentSlot self, EquipmentDef equipmentDef)
         {
             if (self && self.characterBody)
             {
@@ -654,7 +652,7 @@ namespace Crystal_Burden
             return orig(self, equipmentDef);
         }
 
-        private void Duplicating_OnEnter(On.EntityStates.Duplicator.Duplicating.orig_OnEnter orig, EntityStates.Duplicator.Duplicating self)
+        public static void Duplicating_OnEnter(Action<EntityStates.Duplicator.Duplicating> orig, EntityStates.Duplicator.Duplicating self)
         {
             if (!ToggleDebuffs.Value)
             {
@@ -687,7 +685,7 @@ namespace Crystal_Burden
             orig(self);
         }
 
-        private void CharacterMaster_OnBodyStart(On.RoR2.CharacterMaster.orig_OnBodyStart orig, CharacterMaster self, CharacterBody body)
+        public static void CharacterMaster_OnBodyStart(Action<CharacterMaster, CharacterBody> orig, CharacterMaster self, CharacterBody body)
         {
             orig(self, body);
             if (self.playerCharacterMasterController)
@@ -698,7 +696,7 @@ namespace Crystal_Burden
         }
 
         //This hook just updates the stack count
-        private void CharacterBody_Update(On.RoR2.CharacterBody.orig_Update orig, CharacterBody self)
+        public static void CharacterBody_Update(Action<CharacterBody> orig, CharacterBody self)
         {
             orig(self);
             if ((VariantsAffectSize?.Value ?? false) && (Nsfw?.Value ?? false))
@@ -706,8 +704,10 @@ namespace Crystal_Burden
             else if ((!VariantsAffectSize?.Value ?? true) || (!Nsfw?.Value ?? true))
                 Size(7, self, true);
             Size(8, self, true);
+            if (BodyBlend)
+                UpdateBodyBlend(self);
         }
-        public void Size(int operation, CharacterBody body, bool truefalse)
+        public static void Size(int operation, CharacterBody body, bool truefalse)
         {
             if (!ItemVisibility.Value)
                 return;

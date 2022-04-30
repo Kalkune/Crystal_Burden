@@ -1,4 +1,5 @@
-﻿using RoR2;
+﻿using BetterAPI;
+using RoR2;
 using UnityEngine;
 
 namespace Crystal_Burden
@@ -8,22 +9,24 @@ namespace Crystal_Burden
         public static void Init()
         {
             HerCurse = ScriptableObject.CreateInstance<ArtifactDef>();
-
-            HerCurse.descriptionToken = "All item drops will be turned into " + HerBurden.nameToken + " Variants";
+            Languages.AddTokenString("HERCURSE_DESC", "All item drops will be turned into " + HerBurden.nameToken + " Variants");
+            HerCurse.descriptionToken = "HERCURSE_DESC";
             if (Nsfw?.Value ?? false)
             {
-                HerCurse.nameToken = "Artifact of Her Curse";
+                Languages.AddTokenString("HERCURSE_NAME", "Artifact of Her Curse");
+                HerCurse.nameToken = "HERCURSE_NAME";
                 HerCurse.smallIconSelectedSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("HerCurseArtifactBurdenEnabled");
                 HerCurse.smallIconDeselectedSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("HerCurseArtifactBurdenDisabled");
             }
             else if (!Nsfw?.Value ?? true)
             {
-                HerCurse.nameToken = "Artifact of Crystal Curse";
+                Languages.AddTokenString("HERCURSE_NAME", "Artifact of Crystal Curse");
+                HerCurse.nameToken = "HERCURSE_NAME";
                 HerCurse.smallIconSelectedSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("HerCurseArtifactCrystalEnabled");
                 HerCurse.smallIconDeselectedSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("HerCurseArtifactCrystalDisabled");
 
             }
-            BetterAPI.Artifacts.Add(HerCurse);
+            Artifacts.Add(HerCurse);
         }
     }
 }
