@@ -56,15 +56,15 @@ namespace Crystal_Burden
                 Languages.AddTokenString("HERRANCOR_NAME", "Crystal Rancor");
             if (ToggleDebuffs.Value)
             {
-                Languages.AddTokenString("HERRANCOR_PICKUP", "Increase damage and decrease armor.\nAll item drops are now variants of: <color=#307FFF>" + HerBurden.nameToken + "</color>");
-                Languages.AddTokenString("HERRANCOR_DESC", $"Increase damage by {Hbbv}% and decrease armor by {Hbdbv}%.\nAll item drops are now variants of: <color=#307FFF>" + HerBurden.nameToken + "</color>");
+                Languages.AddTokenString("HERRANCOR_PICKUP", "Increase damage and decrease armor.\nAll item drops are now variants of: <color=#307FFF>" + NameToken + "</color>");
+                Languages.AddTokenString("HERRANCOR_DESC", $"Increase damage by {Hbbv}% and decrease armor by {Hbdbv}%.\nAll item drops are now variants of: <color=#307FFF>" + NameToken + "</color>");
             }
             if (!ToggleDebuffs.Value)
             {
-                Languages.AddTokenString("HERRANCOR_PICKUP", "Increase damage.\nMonsters now have a chance to drop variants of: <color=#e7553b>" + HerBurden.nameToken + "</color>");
-                Languages.AddTokenString("HERRANCOR_DESC", $"Increase damage by {Hbbv}%.\nMonsters now have a chance to drop variants of: <color=#e7553b>" + HerBurden.nameToken + "</color>");
+                Languages.AddTokenString("HERRANCOR_PICKUP", "Increase damage.\nMonsters now have a chance to drop variants of: <color=#e7553b>" + NameToken + "</color>");
+                Languages.AddTokenString("HERRANCOR_DESC", $"Increase damage by {Hbbv}%.\nMonsters now have a chance to drop variants of: <color=#e7553b>" + NameToken + "</color>");
             }
-            Languages.AddTokenString("HERRANCOR_LORE", "None");
+            Languages.AddTokenString("HERRANCOR_LORE", "<style=cMono>//--AUTO-TRANSCRIPTION FROM [file unavailable] --//</style>\n\n...then I have something you may find more pleasurable.\n\nHere. Take it in your hand, feel its [girth] upon your palm. Observe its [pointed] texture.\n\nNow bring it within you. Do not worry.\n\nIt is active. Feel its [rancor] within you, how your body strains to [contain] it. Let it give you [strength].\n\nDo not worry. If this does not please you...");
 
         }
         public static void AddLocation(ItemDisplays.CharacterItemDisplayRuleSet rules)
@@ -269,6 +269,16 @@ namespace Crystal_Burden
                     localScale = generalScale * 0.25f
                 }, "mdlMEL-T2"
                 );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "Pelvis",
+                    localPos = new Vector3(-0.025f, 0f, 0f),
+                    localAngles = new Vector3(-15f, 0f, 0f),
+                    localScale = generalScale * 2f
+                }, "mdlPaladin"
+                );
             }
             if (ItemVisibility.Value && (!Nsfw?.Value ?? true))
             {
@@ -436,6 +446,16 @@ namespace Crystal_Burden
                     localAngles = new Vector3(0f, 95f, 130f),
                     localScale = generalScale * 0.25f
                 }, "mdlMEL-T2"
+                );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "LowerArmL",
+                    localPos = new Vector3(0.1f, 0.25f, -0.05f),
+                    localAngles = new Vector3(350f, 90f, 135f),
+                    localScale = generalScale * 2f
+                }, "mdlPaladin"
                 );
             }
         }

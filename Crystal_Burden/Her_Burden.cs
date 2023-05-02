@@ -27,7 +27,7 @@ namespace Crystal_Burden
     [BepInDependency("com.xoxfaby.BetterAPI", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("com.OkIgotIt.Her_Burden", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("com.Maiesen.BodyBlend", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.Kalkune.Crystal_Burden", "Crystal_Burden", "1.5.4")]
+    [BepInPlugin("com.Kalkune.Crystal_Burden", "Crystal_Burden", "1.5.5")]
 
     public class Crystal_Burden : BaseUnityPlugin
     {
@@ -44,10 +44,13 @@ namespace Crystal_Burden
         public static BuffDef HerGambleDeBuff;
         public static ArtifactDef HerCurse;
         public static ItemDef VariantOnSurvivor;
+        public static List<PickupIndex> TransformedList = new List<PickupIndex>();
+        public static PickupIndex CurrentTransformedItem = PickupIndex.none;
         public static float Hbbv;
         public static float Hbdbv;
         public static bool HerBurdenInstalled = false;
         public static bool BodyBlend = false;
+        public static string NameToken = "";
         public static ConfigEntry<bool> ItemVisibility { get; set; }
         public static ConfigEntry<bool> LuckEffect { get; set; }
         public static ConfigEntry<bool> GiveOriginalItem { get; set; }
@@ -72,30 +75,30 @@ namespace Crystal_Burden
         public void Awake()
         {
             SoftDependencies.Init();
-            ItemVisibility = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Item Visibility", true, "Changes if Her Burden Variants shows on the Survivor");
-            LuckEffect = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Luck Effect", true, "Changes if luck effects chance to pickup Her Burden Variants once you have one");
-            GiveOriginalItem = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Give Original Item", false, "Changes if you also get the original item along with a Her Burden Variant (Lunar Tier Exclusive)");
-            ToggleDebuffs = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Debuffs", true, "Changes if debuffs are applied or not, if disabled, Her Burden Variants changes to legendary and makes it have a chance to drop on kill");
-            VariantDropCount = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Variant Drop Count", true, "Changes if all Her Burden Variants are in the drop list or just Her Burden, if disabled, only Her Burden is in the drop list");
-            LuckInverseEffect = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Luck Inverse Effect", true, "Changes if luck is inverted for the Toggle Luck Effect config, if enabled, luck will be inverted");
+            ItemVisibility = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Item Visibility", true, "Changes if Burden Variants shows on the Survivor");
+            LuckEffect = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Luck Effect", true, "Changes if luck effects chance to pickup Burden Variants once you have a Variant");
+            GiveOriginalItem = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Give Original Item", false, "Changes if you receive the original item along with a Burden Variant (Lunar Tier Exclusive)");
+            ToggleDebuffs = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Debuffs", true, "Changes if debuffs are applied or not. If false, Burden Variants will change to legendaries and makes them have a chance to drop on kill");
+            VariantDropCount = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Variant Drop Count", true, "Changes if all Burden Variants are in the drop list separately or together. If false, Variants will only have one entry into the drop list");
+            LuckInverseEffect = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Luck Inverse Effect", true, "Changes if luck is inverted for the \"Toggle Luck Effect\". If true, luck will be inverted");
             if (HerBurdenInstalled || File.ReadAllText(Paths.ConfigPath + "\\com.Kalkune.Crystal_Burden.cfg").Contains("[0. Her Burden NSFW Toggle]"))
             {
-                Nsfw = Config.Bind<bool>("0. Her Burden NSFW Toggle", "Toggles Her Burden NSFW", true, "Changes if Her Burden is NSFW or SFW, if disabled, Her Burden will switch to SFW models");
-                ParticleTrail = Config.Bind<bool>("2. Her Burden Toggle", "Toggle Particle Trail", false, "Changes if the particle trail is visable or not");
-                Artist = Config.Bind<string>("2. Her Burden General", "Artist", "Hush", new ConfigDescription("Decides what artist to use", new AcceptableValueList<string>("Hush", "aka6")));
-                VariantsAffectSize = Config.Bind<bool>("2. Her Burden Toggle", "Toggle Variants Affect Size", false, "Changes if other Her Burden Variants increase item display size");
+                Nsfw = Config.Bind<bool>("0. Her Burden NSFW Toggle", "Toggles Her Burden NSFW", true, "Changes if Her Burden is NSFW or SFW. If false, Her Burden will switch to SFW models");
+                ParticleTrail = Config.Bind<bool>("2. Her Burden Toggle", "Toggle Particle Trail", false, "Changes if the particle trail is visible or not visible");
+                Artist = Config.Bind<string>("2. Her Burden General", "Artist", "Hush", new ConfigDescription("Decides which artist to use", new AcceptableValueList<string>("Hush", "aka6")));
+                VariantsAffectSize = Config.Bind<bool>("2. Her Burden Toggle", "Toggle Variants Affect Size", false, "Changes if other Burden Variants increase item display size");
+                VariantShownOnSurvivor = Config.Bind<string>("2. Her Burden General", "Variant Size Increase", "Burden", new ConfigDescription("Changes which Variant gets its size increased", new AcceptableValueList<string>("Burden", "Recluse", "Fury", "Torpor", "Rancor", "Panic")));
             }
-            VariantShownOnSurvivor = Config.Bind<string>("1. Her Burden General", "Variant Size Increase", "Burden", new ConfigDescription("Changes what Variant gets its size increased", new AcceptableValueList<string>("Burden", "Recluse", "Fury", "Torpor", "Rancor", "Panic")));
-            MaxSize = Config.Bind<float>("1. Her Burden Size", "Max size of Variant", 2, "Changes the max size of the item on the Survivor");
-            SizeMultiplier = Config.Bind<float>("1. Her Burden Size", "Size Multiplier for Variant", 20, "Changes how many Variants are required to get to the max size");
-            DecreaseItemDropPercentage = Config.Bind<float>("1. Her Burden Mechanics", "Decrease Item Drop Percentage", .8f, "The rate that the drop chance percentage decreases towards \"Minimum Drop Chance\" (Lunar Tier Exclusive)");
-            MinimumDropChance = Config.Bind<float>("1. Her Burden Mechanics", "Minimum Drop Chance", 10, "Mimimum Variant Drop chance, doesn't override \"Chance to change pickup to Her Burden Variants\" if \"Minimum Drop Chance\" is a higher value than it (Lunar Tier Exclusive)");
-            ChanceChangePickup = Config.Bind<int>("1. Her Burden Mechanics", "Chance to change pickup to Her Burden Variants", 100, "Chance to change other items to Her Burden Variants on pickup once you have one (Lunar Tier Exclusive)");
-            ChanceEnemyDrop = Config.Bind<int>("1. Her Burden Mechanics", "Chance for enemies to drop Her Burden Variants", 5, "Chance for enemies top drop Her Burden Variants once you have one (Legendary Tier Exclusive)");
-            LimitDecreaseItemDropPercentage = Config.Bind<int>("1. Her Burden Mechanics", "Item Limit Amount to Decrease Item Drop Percentage", 20, "Variants needed to start decreasing drop chance, \"Decrease Item Drop Percentage\" and \"Minimum Drop Chance\" are part of this config (Lunar Tier Exclusive)");
-            Hbbuff = Config.Bind<float>("1. Her Burden Mechanics", "Buff", 1.05f, "Changes the increase of buff of the item per item exponentially");
-            Hbdebuff = Config.Bind<float>("1. Her Burden Mechanics", "Debuff", 0.975f, "Changes the decrease of debuff of the item per item exponentially");
-            Hbversion = Config.Bind<string>("Dev. Development Config", "Version", "1.5.1", "I don't recommend changing this value");
+            MaxSize = Config.Bind<float>("1. Her Burden Size", "Max size of Variant", 2, "Changes the max size of all Variants on the Survivor");
+            SizeMultiplier = Config.Bind<float>("1. Her Burden Size", "Size Multiplier for Variant", 20, "Changes how many of each Variant are required to get to the max size");
+            DecreaseItemDropPercentage = Config.Bind<float>("1. Her Burden Mechanics", "Decrease Item Drop Percentage", .8f, "The rate of the drop chance percentage decreases towards \"Minimum Drop Chance\" (Lunar Tier Exclusive)");
+            MinimumDropChance = Config.Bind<float>("1. Her Burden Mechanics", "Minimum Drop Chance", 10, "Minimum Variant Drop chance, doesn't override \"Chance to change pickup to Her Burden Variants\" if \"Minimum Drop Chance\" is a higher value than \"Chance to change pickup to Her Burden Variants\" (Lunar Tier Exclusive)");
+            ChanceChangePickup = Config.Bind<int>("1. Her Burden Mechanics", "Chance to change pickup to Her Burden Variants", 100, "Chance to change other items to Burden Variants on pickup once you have a Variant (Lunar Tier Exclusive)");
+            ChanceEnemyDrop = Config.Bind<int>("1. Her Burden Mechanics", "Chance for enemies to drop Her Burden Variants", 5, "Chance for enemies to drop Burden Variants once you have a Variant (Legendary Tier Exclusive)");
+            LimitDecreaseItemDropPercentage = Config.Bind<int>("1. Her Burden Mechanics", "Item Limit Amount to Decrease Item Drop Percentage", 20, "Variants needed to start decreasing drop chance. \"Decrease Item Drop Percentage\" and \"Minimum Drop Chance\" are part of this config (Lunar Tier Exclusive)");
+            Hbbuff = Config.Bind<float>("1. Her Burden Mechanics", "Buff", 1.05f, "Changes the increase of buff of the item exponentially per item");
+            Hbdebuff = Config.Bind<float>("1. Her Burden Mechanics", "Debuff", 0.975f, "Changes the decrease of debuff of the item exponentially per item");
+            Hbversion = Config.Bind<string>("Dev. Development Config", "Version", "1.5.2", "I don't recommend changing this value");
             Hbbv = (float)Math.Round((Hbbuff.Value - 1f) * 100f, 2);
             Hbdbv = (float)Math.Round(Math.Abs((Hbdebuff.Value - 1f) * 100f), 2);
             using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Crystal_Burden.Resources.herburden"))
@@ -175,10 +178,150 @@ namespace Crystal_Burden
             Hook PickupDropletControllerCreatePickupDroplet_CreatePickupInfo_Vector3_Vector3 = new Hook(typeof(PickupDropletController).GetMethod("CreatePickupDroplet", new Type[] { typeof(GenericPickupController.CreatePickupInfo), typeof(Vector3), typeof(Vector3) }), typeof(Crystal_Burden).GetMethod("PickupDropletController_CreatePickupDroplet_CreatePickupInfo_Vector3_Vector3"));
             Hook CharacterMasterRespawnExtraLife = new Hook(typeof(CharacterMaster).GetMethod("RespawnExtraLife", BindingFlags.Public | BindingFlags.Instance), typeof(Crystal_Burden).GetMethod("CharacterMaster_RespawnExtraLife"));
             Hook PickupPickerControllerSetOptionsFromPickupForCommandArtifact = new Hook(typeof(PickupPickerController).GetMethod("SetOptionsFromPickupForCommandArtifact", BindingFlags.Public | BindingFlags.Instance), typeof(Crystal_Burden).GetMethod("PickupPickerController_SetOptionsFromPickupForCommandArtifact"));
-            Hook CostTypeCatalogLunarItemOrEquipmentCostTypeHelper = new Hook(typeof(CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper).GetMethod("Init", BindingFlags.NonPublic | BindingFlags.Static), typeof(Crystal_Burden).GetMethod("LunarItemOrEquipmentCostTypeHelper_Init"));
             Hook InventoryGiveItem_ItemIndex_int = new Hook(typeof(Inventory).GetMethod("GiveItem", new Type[] { typeof(ItemIndex), typeof(int) }), typeof(Crystal_Burden).GetMethod("Inventory_GiveItem_ItemIndex_int"));
             Hook InventoryRemoveItem_ItemIndex_int = new Hook(typeof(Inventory).GetMethod("RemoveItem", new Type[] { typeof(ItemIndex), typeof(int) }), typeof(Crystal_Burden).GetMethod("Inventory_RemoveItem_ItemIndex_int"));
             Hook ItemDefAttemptGrant = new Hook(typeof(ItemDef).GetMethod("AttemptGrant"), typeof(Crystal_Burden).GetMethod("ItemDef_AttemptGrant"));
+            //On.RoR2.CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper.PayCost += LunarItemOrEquipmentCostTypeHelper_PayCost;
+            Hook LunarItemOrEquipmentCostTypeHelper_PayCost = new Hook(typeof(CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper).GetMethod("PayCost", BindingFlags.Public | BindingFlags.Instance), typeof(Crystal_Burden).GetMethod("LunarItemOrEquipmentCostTypeHelper_PayCost"));
+            //On.RoR2.PurchaseInteraction.GetInteractability += PurchaseInteraction_GetInteractability;
+            Hook PurchaseInteraction_GetInteractability = new Hook(typeof(PurchaseInteraction).GetMethod("GetInteractability", BindingFlags.Public | BindingFlags.Instance), typeof(Crystal_Burden).GetMethod("PurchaseInteraction_GetInteractability"));
+            //On.RoR2.ShopTerminalBehavior.DropPickup += ShopTerminalBehavior_DropPickup;
+            Hook ShopTerminalBehavior_DropPickup = new Hook(typeof(ShopTerminalBehavior).GetMethod("DropPickup", BindingFlags.Public | BindingFlags.Instance), typeof(Crystal_Burden).GetMethod("ShopTerminalBehavior_DropPickup"));
+            Hook CharacterBody_RecalculateStats = new Hook(typeof(CharacterBody).GetMethod("RecalculateStats", BindingFlags.Public | BindingFlags.Instance), typeof(Crystal_Burden).GetMethod("CharacterBody_RecalculateStats"));
+        }
+
+        public static void CharacterBody_RecalculateStats(Action<CharacterBody> orig, CharacterBody self)
+        {
+            if (!self || !self.inventory)
+                orig(self);
+            self.acceleration += (self.inventory.GetItemCount(HerPanic)*4);
+            orig(self);
+        }
+
+        public static void ShopTerminalBehavior_DropPickup(Action<ShopTerminalBehavior> orig, ShopTerminalBehavior self)
+        {
+            if(CurrentTransformedItem != PickupIndex.none)
+            {
+                self.pickupIndex = CurrentTransformedItem;
+                CurrentTransformedItem = PickupIndex.none;
+            }
+            orig(self);
+        }
+
+        public static Interactability PurchaseInteraction_GetInteractability(Func<PurchaseInteraction, Interactor, Interactability> orig, PurchaseInteraction self, Interactor activator)
+        {
+            if (self.displayNameToken.ToLower() == "shrine_cleanse_name" && CurrentTransformedItem != PickupIndex.none)
+                    return Interactability.Disabled;
+            return orig(self, activator);
+        }
+
+        public void LunarItemOrEquipmentCostTypeHelper_PayCost(On.RoR2.CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper.orig_PayCost orig, CostTypeDef costTypeDef, CostTypeDef.PayCostContext context)
+        {
+            Inventory inventory = context.activator.GetComponent<CharacterBody>().inventory;
+            int cost = context.cost;
+            int itemWeight = 0;
+            int equipmentWeight = 0;
+            for (int i = 0; i < CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper.lunarItemIndices.Length; i++)
+            {
+                ItemIndex itemIndex = CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper.lunarItemIndices[i];
+                int itemCount = inventory.GetItemCount(itemIndex);
+                itemWeight += itemCount;
+            }
+            int j = 0;
+            for (int equipmentSlotCount = inventory.GetEquipmentSlotCount(); j < equipmentSlotCount; j++)
+            {
+                if (Array.IndexOf(value: inventory.GetEquipment((uint)j).equipmentIndex, array: CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper.lunarEquipmentIndices) != -1)
+                {
+                    equipmentWeight++;
+                }
+            }
+            int totalWeight = itemWeight + equipmentWeight;
+            for (int k = 0; k < cost; k++)
+            {
+                TakeOne();
+            }
+            RoR2.Items.MultiShopCardUtils.OnNonMoneyPurchase(context);
+            void TakeOne()
+            {
+                float nextNormalizedFloat = context.rng.nextNormalizedFloat;
+                float num = (float)itemWeight / (float)totalWeight;
+                if (nextNormalizedFloat < num)
+                {
+                    int num2 = Mathf.FloorToInt(Util.Remap(Util.Remap(nextNormalizedFloat, 0f, num, 0f, 1f), 0f, 1f, 0f, itemWeight));
+                    int num3 = 0;
+                    for (int l = 0; l < CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper.lunarItemIndices.Length; l++)
+                    {
+                        ItemIndex itemIndex2 = CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper.lunarItemIndices[l];
+                        int itemCount2 = inventory.GetItemCount(itemIndex2);
+                        num3 += itemCount2;
+                        if (num2 < num3)
+                        {
+                            if (TransformedList.Count != 0 && ItemCatalog.GetItemDef(itemIndex2).ContainsTag((ItemTag)19))
+                            {
+                                int ItemsToRemove;
+                                CurrentTransformedItem = TransformedList[UnityRandom.Range(0, TransformedList.Count)];
+                                ItemTier TransformedTier = PickupCatalog.GetPickupDef(CurrentTransformedItem).itemTier;
+                                TransformedList.Remove(CurrentTransformedItem);
+                                if (TransformedTier == ItemTier.Tier1 || TransformedTier == ItemTier.VoidTier1)
+                                    ItemsToRemove = 1;
+                                else if (TransformedTier == ItemTier.Tier2 || TransformedTier == ItemTier.VoidTier2)
+                                    ItemsToRemove = 2;
+                                else if (TransformedTier == ItemTier.Tier3 || TransformedTier == ItemTier.VoidTier3)
+                                    ItemsToRemove = 5;
+                                else if (TransformedTier == ItemTier.Lunar)
+                                    ItemsToRemove = 1;
+                                else if (TransformedTier == ItemTier.Boss || TransformedTier == ItemTier.VoidBoss)
+                                    ItemsToRemove = 1;
+                                else
+                                    ItemsToRemove = 1;
+                                for (int i = 0; i < ItemsToRemove; i++)
+                                {
+                                    List<ItemIndex> items = new List<ItemIndex>();
+                                    if (inventory.GetItemCount(HerBurden.itemIndex) > 0)
+                                        items.Add(HerBurden.itemIndex);
+                                    if (inventory.GetItemCount(HerRecluse.itemIndex) > 0)
+                                        items.Add(HerRecluse.itemIndex);
+                                    if (inventory.GetItemCount(HerFury.itemIndex) > 0)
+                                        items.Add(HerFury.itemIndex);
+                                    if (inventory.GetItemCount(HerTorpor.itemIndex) > 0)
+                                        items.Add(HerTorpor.itemIndex);
+                                    if (inventory.GetItemCount(HerRancor.itemIndex) > 0)
+                                        items.Add(HerRancor.itemIndex);
+                                    if (inventory.GetItemCount(HerPanic.itemIndex) > 0)
+                                        items.Add(HerPanic.itemIndex);
+                                    ItemIndex itemRemoved = items[UnityRandom.Range(0, items.Count)];
+                                    inventory.RemoveItem(itemRemoved);
+                                    context.results.itemsTaken.Add(itemRemoved);
+                                }
+                            }
+                            else
+                            {
+                                inventory.RemoveItem(itemIndex2);
+                                context.results.itemsTaken.Add(itemIndex2);
+                            }
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    int num4 = Mathf.FloorToInt(Util.Remap(Util.Remap(nextNormalizedFloat, num, 1f, 0f, 1f), 0f, 1f, 0f, equipmentWeight));
+                    int num5 = 0;
+                    for (int m = 0; m < inventory.GetEquipmentSlotCount(); m++)
+                    {
+                        EquipmentIndex equipmentIndex2 = inventory.GetEquipment((uint)m).equipmentIndex;
+                        if (Array.IndexOf(CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper.lunarEquipmentIndices, equipmentIndex2) != -1)
+                        {
+                            num5++;
+                            if (num4 < num5)
+                            {
+                                inventory.SetEquipment(EquipmentState.empty, (uint)m);
+                                context.results.equipmentTaken.Add(equipmentIndex2);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         public static void ItemDef_AttemptGrant(On.RoR2.ItemDef.orig_AttemptGrant orig, ref PickupDef.GrantContext context)
@@ -241,9 +384,10 @@ namespace Crystal_Burden
                     TotalDrops++;
                 if (changepickup == true && TotalDrops > 0 && blacklist == false)
                 {
-                    if (ItemCatalog.GetItemDef(PickupCatalog.GetPickupDef(self.pickupIndex).itemIndex).tier == ItemTier.Tier2)
+                    ItemDef itemDef = ItemCatalog.GetItemDef(PickupCatalog.GetPickupDef(self.pickupIndex).itemIndex);
+                    if (itemDef.tier == ItemTier.Tier2 || itemDef.tier == ItemTier.VoidTier2 || itemDef.tier == ItemTier.Boss || itemDef.tier == ItemTier.VoidBoss)
                         TotalDrops += 1;
-                    else if (ItemCatalog.GetItemDef(PickupCatalog.GetPickupDef(self.pickupIndex).itemIndex).tier == ItemTier.Tier3)
+                    else if (itemDef.tier == ItemTier.Tier3 || itemDef.tier == ItemTier.VoidTier3)
                         TotalDrops += 4;
                     if (GiveOriginalItem.Value)
                     {
@@ -275,8 +419,9 @@ namespace Crystal_Burden
                         }
                         orig(ref context);
                         //GenericPickupController.SendPickupMessage(body.master, self.pickupIndex);
-                        CharacterMasterNotificationQueue.PushItemTransformNotification(body.master, PickupCatalog.GetPickupDef(originalItem).itemIndex, PickupCatalog.GetPickupDef(self.pickupIndex).itemIndex, CharacterMasterNotificationQueue.TransformationType.Suppressed);
+                        CharacterMasterNotificationQueue.PushItemTransformNotification(body.master, PickupCatalog.GetPickupDef(originalItem).itemIndex, itemDef.itemIndex, CharacterMasterNotificationQueue.TransformationType.Suppressed);
                     }
+                    TransformedList.Add(originalItem);
 
                     //Handle the size change with scripts
                     Size(1, body, false);
@@ -371,20 +516,6 @@ namespace Crystal_Burden
                 self.SetBlendValue("Breasts", 1f, "Burden");
             else
                 self.SetBlendValue("Breasts", 0f, "Burden");
-        }
-
-        public static void LunarItemOrEquipmentCostTypeHelper_Init(Action orig)
-        {
-            orig();
-            ItemIndex[] temp = CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper.lunarItemIndices;
-            List<ItemIndex> temp2 = temp.ToList();
-            temp2.Remove(HerBurden.itemIndex);
-            temp2.Remove(HerRecluse.itemIndex);
-            temp2.Remove(HerFury.itemIndex);
-            temp2.Remove(HerTorpor.itemIndex);
-            temp2.Remove(HerRancor.itemIndex);
-            temp2.Remove(HerPanic.itemIndex);
-            CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper.lunarItemIndices = temp2.ToArray();
         }
 
         public static void PickupPickerController_SetOptionsFromPickupForCommandArtifact(Action<PickupPickerController, PickupIndex> orig, PickupPickerController self, PickupIndex pickupIndex)
@@ -715,7 +846,7 @@ namespace Crystal_Burden
                 return;
             if (!body.master)
                 return;
-            ItemDisplayRuleSet IDRS = body.master.bodyPrefab.GetComponentInChildren<CharacterModel>().itemDisplayRuleSet;
+            ItemDisplayRuleSet IDRS = body.master.bodyPrefab.GetComponentInChildren<CharacterModel>()?.itemDisplayRuleSet;
             if (!IDRS)
                 return;
             if (body.baseNameToken == "BROTHER_BODY_NAME")

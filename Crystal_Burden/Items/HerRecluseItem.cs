@@ -56,15 +56,15 @@ namespace Crystal_Burden
                 Languages.AddTokenString("HERRECLUSE_NAME", "Crystal Recluse");
             if (ToggleDebuffs.Value)
             {
-                Languages.AddTokenString("HERRECLUSE_PICKUP", "Increase armor and decrease regen.\nAll item drops are now: <color=#307FFF>" + HerBurden.nameToken + "</color>");
-                Languages.AddTokenString("HERRECLUSE_DESC", $"Increase armor by {Hbbv}% and decrease regen by {Hbdbv}%.\nAll item drops are now: <color=#307FFF>" + HerBurden.nameToken + "</color>");
+                Languages.AddTokenString("HERRECLUSE_PICKUP", "Increase armor and decrease regen.\nAll item drops are now: <color=#307FFF>" + NameToken + "</color>");
+                Languages.AddTokenString("HERRECLUSE_DESC", $"Increase armor by {Hbbv}% and decrease regen by {Hbdbv}%.\nAll item drops are now: <color=#307FFF>" + NameToken + "</color>");
             }
             if (!ToggleDebuffs.Value)
             {
-                Languages.AddTokenString("HERRECLUSE_PICKUP", "Increase armor.\nMonsters now have a chance to drop variants of: <color=#e7553b>" + HerBurden.nameToken + "</color>");
-                Languages.AddTokenString("HERRECLUSE_DESC", $"Increase armor by {Hbbv}%.\nMonsters now have a chance to drop variants of: <color=#e7553b>" + HerBurden.nameToken + "</color>");
+                Languages.AddTokenString("HERRECLUSE_PICKUP", "Increase armor.\nMonsters now have a chance to drop variants of: <color=#e7553b>" + NameToken + "</color>");
+                Languages.AddTokenString("HERRECLUSE_DESC", $"Increase armor by {Hbbv}%.\nMonsters now have a chance to drop variants of: <color=#e7553b>" + NameToken + "</color>");
             }
-            Languages.AddTokenString("HERRECLUSE_LORE", "None");
+            Languages.AddTokenString("HERRECLUSE_LORE", "<style=cMono>//--AUTO-TRANSCRIPTION FROM [file unavailable] --//</style>\n\n...then I have something you may find more pleasurable.\n\nHere. Take it in your hand, feel its [softness] upon your palm. Observe its [blocky] texture.\n\nNow bring it within you. Do not worry.\n\nIt is active. Feel its [recluse] within you, how your body strains to [sustain] it. Let it give you [safety].\n\nDo not worry. If this does not please you...");
 
         }
         public static void AddLocation(ItemDisplays.CharacterItemDisplayRuleSet rules)
@@ -269,6 +269,16 @@ namespace Crystal_Burden
                     localScale = generalScale * 0.25f
                 }, "mdlMEL-T2"
                 );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "Pelvis",
+                    localPos = new Vector3(-0.025f, 0f, 0f),
+                    localAngles = new Vector3(-15f, 0f, 0f),
+                    localScale = generalScale * 2f
+                }, "mdlPaladin"
+                );
             }
             if (ItemVisibility.Value && (!Nsfw?.Value ?? true))
             {
@@ -436,6 +446,16 @@ namespace Crystal_Burden
                     localAngles = new Vector3(0f, 0f, 0f),
                     localScale = generalScale * 0.25f
                 }, "mdlMEL-T2"
+                );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "Chest",
+                    localPos = new Vector3(0.3f, 0.45f, -0.175f),
+                    localAngles = new Vector3(0f, 0f, 0f),
+                    localScale = generalScale * 2f
+                }, "mdlPaladin"
                 );
             }
         }

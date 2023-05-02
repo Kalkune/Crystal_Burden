@@ -56,15 +56,15 @@ namespace Crystal_Burden
                 Languages.AddTokenString("HERFURY_NAME", "Crystal Fury");
             if (ToggleDebuffs.Value)
             {
-                Languages.AddTokenString("HERFURY_PICKUP", "Increase attack speed and decrease HP.\nAll item drops are now variants of: <color=#307FFF>" + HerBurden.nameToken + "</color>");
-                Languages.AddTokenString("HERFURY_DESC", $"Increase attack speed by {Hbbv}% and decrease HP by {Hbdbv}%.\nAll item drops are now variants of: <color=#307FFF>" + HerBurden.nameToken + "</color>");
+                Languages.AddTokenString("HERFURY_PICKUP", "Increase attack speed and decrease HP.\nAll item drops are now variants of: <color=#307FFF>" + NameToken + "</color>");
+                Languages.AddTokenString("HERFURY_DESC", $"Increase attack speed by {Hbbv}% and decrease HP by {Hbdbv}%.\nAll item drops are now variants of: <color=#307FFF>" + NameToken + "</color>");
             }
             if (!ToggleDebuffs.Value)
             {
-                Languages.AddTokenString("HERFURY_PICKUP", "Increase attack speed.\nMonsters now have a chance to drop variants of: <color=#e7553b>" + HerBurden.nameToken + "</color>");
-                Languages.AddTokenString("HERFURY_DESC", $"Increase attack speed by {Hbbv}%.\nMonsters now have a chance to drop variants of: <color=#e7553b>" + HerBurden.nameToken + "</color>");
+                Languages.AddTokenString("HERFURY_PICKUP", "Increase attack speed.\nMonsters now have a chance to drop variants of: <color=#e7553b>" + NameToken + "</color>");
+                Languages.AddTokenString("HERFURY_DESC", $"Increase attack speed by {Hbbv}%.\nMonsters now have a chance to drop variants of: <color=#e7553b>" + NameToken + "</color>");
             }
-            Languages.AddTokenString("HERFURY_LORE", "None");
+            Languages.AddTokenString("HERFURY_LORE", "<style=cMono>//--AUTO-TRANSCRIPTION FROM [file unavailable] --//</style>\n\n...then I have something you may find more pleasurable.\n\nHere. Take it in your hand, feel its [heat] upon your palm. Observe its [rough] texture.\n\nNow bring it within you. Do not worry.\n\nIt is active. Feel its [fury] within you, how your body strains to [sustain] it. Let it give you [passion].\n\nDo not worry. If this does not please you...");
 
         }
         public static void AddLocation(ItemDisplays.CharacterItemDisplayRuleSet rules)
@@ -269,6 +269,16 @@ namespace Crystal_Burden
                     localScale = generalScale * 0.25f
                 }, "mdlMEL-T2"
                 );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "Pelvis",
+                    localPos = new Vector3(-0.025f, 0f, 0f),
+                    localAngles = new Vector3(-15f, 0f, 0f),
+                    localScale = generalScale * 2f
+                }, "mdlPaladin"
+                );
             }
             if (ItemVisibility.Value && (!Nsfw?.Value ?? true))
             {
@@ -436,6 +446,16 @@ namespace Crystal_Burden
                     localAngles = new Vector3(0f, 90f, 180f),
                     localScale = generalScale * 0.25f
                 }, "mdlMEL-T2"
+                );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "Pelvis",
+                    localPos = new Vector3(0.325f, 0.15f, 0.04f),
+                    localAngles = new Vector3(0f, 20f, 0f),
+                    localScale = generalScale * 2f
+                }, "mdlPaladin"
                 );
             }
         }

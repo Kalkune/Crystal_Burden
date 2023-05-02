@@ -10,13 +10,16 @@ namespace Crystal_Burden
     {
         public static void Init()
         {
-            if (Hbversion.Value == "1.5.0")
+            if (Hbversion.Value != (string)Hbversion.DefaultValue)
             {
-                LuckEffect.Value = true;
-                Hbversion.Value = "1.5.1";
+                if (Hbversion.Value == "1.5.0")
+                {
+                    LuckEffect.Value = true;
+                    Hbversion.Value = "1.5.1";
+                }
+                if (Hbversion.Value == "1.5.1")
+                    Hbversion.Value = "1.5.2";
             }
-            if (Hbversion.Value == "1.5.1")
-                Hbversion.Value = "1.5.2";
         }
     }
 }

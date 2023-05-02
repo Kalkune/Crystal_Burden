@@ -68,14 +68,14 @@ namespace Crystal_Burden
             if (ToggleDebuffs.Value)
             {
                 Languages.AddTokenString("HERGAMBLE_PICKUP", "An equipment that gambles your stats");
-                Languages.AddTokenString("HERGAMBLE_DESC", "An equipment that gambles your stats that come from " + HerBurden.nameToken + " Variants");
+                Languages.AddTokenString("HERGAMBLE_DESC", "An equipment that gambles your stats that come from <color=#307FFF>" + NameToken + "</color> Variants");
             }
             if (!ToggleDebuffs.Value)
             {
                 Languages.AddTokenString("HERGAMBLE_PICKUP", "Has a chance to double your stats");
-                Languages.AddTokenString("HERGAMBLE_DESC", "Has a chance to double your stats that come from " + HerBurden.nameToken + " Variants");
+                Languages.AddTokenString("HERGAMBLE_DESC", "Has a chance to double your stats that come from <color=#e7553b>" + NameToken + "</color> Variants");
             }
-            Languages.AddTokenString("HERGAMBLE_LORE", "None");
+            Languages.AddTokenString("HERGAMBLE_LORE", "<style=cMono>//--AUTO-TRANSCRIPTION FROM [file unavailable] --//</style>\n\n...then I have something for you, now that you have found pleasure.\n\nHere. Take it in your hand, feel its [TRANSCRIPTION ERROR]. Observe how its texture changes.\n\nNow bring it within you. Do not worry.\n\nDo not activate it yet. Allow it to [observe]. Feel your [pleasure] empower it.\n\nDo not worry. If ever you wish to be pleased...");
 
         }
         public static void AddLocation(ItemDisplays.CharacterItemDisplayRuleSet rules)
@@ -268,6 +268,16 @@ namespace Crystal_Burden
                     localScale = generalScale * 0.25f
                 }, "mdlMEL-T2"
                 );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "ThighR",
+                    localPos = new Vector3(0.055f, 0.1f, -0.325f),
+                    localAngles = new Vector3(37.5f, 32.5f, 155f),
+                    localScale = generalScale
+                }, "mdlPaladin"
+                );
             }
             if (ItemVisibility.Value && (!Nsfw?.Value ?? true))
             {
@@ -431,6 +441,16 @@ namespace Crystal_Burden
                     localAngles = new Vector3(0f, 0f, 0f),
                     localScale = generalScale * 0.25f
                 }, "mdlMEL-T2"
+                );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "Chest",
+                    localPos = new Vector3(0f, 0.15f, 0.1f),
+                    localAngles = new Vector3(0f, 0f, 0f),
+                    localScale = generalScale * 2f
+                }, "mdlPaladin"
                 );
             }
         }
