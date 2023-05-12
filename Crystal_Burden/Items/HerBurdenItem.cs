@@ -106,7 +106,7 @@ namespace Crystal_Burden
             if (ItemVisibility.Value && (Nsfw?.Value ?? false))
             {
                 GameObject followerPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>(Artist.Value + "her_burden");
-                /*if (VariantShownOnSurvivor.Value == "Burden")
+                if (VariantShownOnSurvivor.Value == "Burden")
                 {
                     followerPrefab.AddComponent<PrefabSizeScript>();
                     followerPrefab.transform.Find("DildoTrail").gameObject.SetActive(ParticleTrail.Value);
@@ -115,7 +115,7 @@ namespace Crystal_Burden
                 {
                     followerPrefab.AddComponent<FakeBurdenPrefabSizeScript>();
                     followerPrefab.transform.Find("DildoTrail").gameObject.SetActive(false);
-                }*/
+                }
                 Vector3 generalScale = new Vector3(.0125f, .0125f, .0125f);
                 rules.AddCharacterModelRule(new ItemDisplayRule
                 {
@@ -276,6 +276,16 @@ namespace Crystal_Burden
                     localAngles = new Vector3(-15f, 0f, 0f),
                     localScale = generalScale * 2f
                 }, "mdlPaladin"
+                );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "Pelvis",
+                    localPos = new Vector3(0f, 0.125f, 0.075f),
+                    localAngles = new Vector3(180f, -0.05f, 0f),
+                    localScale = generalScale
+                }, "mdlDeputy"
                 );
             }
             if (ItemVisibility.Value && (!Nsfw?.Value ?? true))
@@ -454,6 +464,16 @@ namespace Crystal_Burden
                     localAngles = new Vector3(0f, 0f, 0f),
                     localScale = generalScale * 2f
                 }, "mdlPaladin"
+                );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "Chest",
+                    localPos = new Vector3(-0.15f, 0.25f, -0.025f),
+                    localAngles = new Vector3(0f, 0f, 0f),
+                    localScale = generalScale * 0.8f
+                }, "mdlDeputy"
                 );
             }
         }

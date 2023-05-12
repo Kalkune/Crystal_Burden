@@ -27,7 +27,7 @@ namespace Crystal_Burden
     [BepInDependency("com.xoxfaby.BetterAPI", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("com.OkIgotIt.Her_Burden", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("com.Maiesen.BodyBlend", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.Kalkune.Crystal_Burden", "Crystal_Burden", "1.5.5")]
+    [BepInPlugin("com.Kalkune.Crystal_Burden", "Crystal_Burden", "1.5.6")]
 
     public class Crystal_Burden : BaseUnityPlugin
     {
@@ -181,19 +181,16 @@ namespace Crystal_Burden
             Hook InventoryGiveItem_ItemIndex_int = new Hook(typeof(Inventory).GetMethod("GiveItem", new Type[] { typeof(ItemIndex), typeof(int) }), typeof(Crystal_Burden).GetMethod("Inventory_GiveItem_ItemIndex_int"));
             Hook InventoryRemoveItem_ItemIndex_int = new Hook(typeof(Inventory).GetMethod("RemoveItem", new Type[] { typeof(ItemIndex), typeof(int) }), typeof(Crystal_Burden).GetMethod("Inventory_RemoveItem_ItemIndex_int"));
             Hook ItemDefAttemptGrant = new Hook(typeof(ItemDef).GetMethod("AttemptGrant"), typeof(Crystal_Burden).GetMethod("ItemDef_AttemptGrant"));
-            //On.RoR2.CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper.PayCost += LunarItemOrEquipmentCostTypeHelper_PayCost;
-            Hook LunarItemOrEquipmentCostTypeHelper_PayCost = new Hook(typeof(CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper).GetMethod("PayCost", BindingFlags.Public | BindingFlags.Instance), typeof(Crystal_Burden).GetMethod("LunarItemOrEquipmentCostTypeHelper_PayCost"));
-            //On.RoR2.PurchaseInteraction.GetInteractability += PurchaseInteraction_GetInteractability;
+            Hook LunarItemOrEquipmentCostTypeHelper_PayCost = new Hook(typeof(CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper).GetMethod("PayCost", BindingFlags.Public | BindingFlags.Static), typeof(Crystal_Burden).GetMethod("LunarItemOrEquipmentCostTypeHelper_PayCost"));
             Hook PurchaseInteraction_GetInteractability = new Hook(typeof(PurchaseInteraction).GetMethod("GetInteractability", BindingFlags.Public | BindingFlags.Instance), typeof(Crystal_Burden).GetMethod("PurchaseInteraction_GetInteractability"));
-            //On.RoR2.ShopTerminalBehavior.DropPickup += ShopTerminalBehavior_DropPickup;
             Hook ShopTerminalBehavior_DropPickup = new Hook(typeof(ShopTerminalBehavior).GetMethod("DropPickup", BindingFlags.Public | BindingFlags.Instance), typeof(Crystal_Burden).GetMethod("ShopTerminalBehavior_DropPickup"));
             Hook CharacterBody_RecalculateStats = new Hook(typeof(CharacterBody).GetMethod("RecalculateStats", BindingFlags.Public | BindingFlags.Instance), typeof(Crystal_Burden).GetMethod("CharacterBody_RecalculateStats"));
         }
 
         public static void CharacterBody_RecalculateStats(Action<CharacterBody> orig, CharacterBody self)
         {
-            if (!self || !self.inventory)
-                orig(self);
+            if (!self?.inventory)
+                return;
             self.acceleration += (self.inventory.GetItemCount(HerPanic)*4);
             orig(self);
         }
@@ -215,7 +212,7 @@ namespace Crystal_Burden
             return orig(self, activator);
         }
 
-        public void LunarItemOrEquipmentCostTypeHelper_PayCost(On.RoR2.CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper.orig_PayCost orig, CostTypeDef costTypeDef, CostTypeDef.PayCostContext context)
+        public static void LunarItemOrEquipmentCostTypeHelper_PayCost(On.RoR2.CostTypeCatalog.LunarItemOrEquipmentCostTypeHelper.orig_PayCost orig, CostTypeDef costTypeDef, CostTypeDef.PayCostContext context)
         {
             Inventory inventory = context.activator.GetComponent<CharacterBody>().inventory;
             int cost = context.cost;
@@ -440,7 +437,6 @@ namespace Crystal_Burden
 
         public static void Inventory_RemoveItem_ItemIndex_int(Action<Inventory, ItemIndex, int> orig, Inventory self, ItemIndex itemIndex, int count)
         {
-
             CharacterMaster master = self.gameObject.GetComponent<CharacterMaster>();
             if (!master)
                 return;
