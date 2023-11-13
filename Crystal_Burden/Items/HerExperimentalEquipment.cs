@@ -288,6 +288,16 @@ namespace Crystal_Burden
                     localScale = generalScale * 0.8f
                 }, "mdlDeputy"
                 );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "ThighR",
+                    localPos = new Vector3(-0.06f, 0.055f, 0.08f),
+                    localAngles = new Vector3(40f, 150f, 180f),
+                    localScale = generalScale * 0.8f
+                }, "mdlDriver(Clone)"
+                );
             }
             if (ItemVisibility.Value && (!Nsfw?.Value ?? true))
             {
@@ -471,6 +481,16 @@ namespace Crystal_Burden
                     localAngles = new Vector3(0f, 0f, 0f),
                     localScale = generalScale * 0.8f
                 }, "mdlDeputy"
+                );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "Chest",
+                    localPos = new Vector3(0f, 0.175f, 0.05f),
+                    localAngles = new Vector3(0f, 0f, 0f),
+                    localScale = generalScale * 0.8f
+                }, "mdlDriver(Clone)"
                 );
             }
         }

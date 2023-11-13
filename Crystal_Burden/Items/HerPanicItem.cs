@@ -289,6 +289,16 @@ namespace Crystal_Burden
                     localScale = generalScale
                 }, "mdlDeputy"
                 );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "Pelvis",
+                    localPos = new Vector3(0f, 0.125f, -0.075f),
+                    localAngles = new Vector3(180f, 180f, 0f),
+                    localScale = generalScale
+                }, "mdlDriver(Clone)"
+                );
             }
             if (ItemVisibility.Value && (!Nsfw?.Value ?? true))
             {
@@ -302,10 +312,7 @@ namespace Crystal_Burden
                 materials[3].shader = what2.shader;
                 materials[3].CopyPropertiesFromMaterial(what2);
                 followerPrefab.GetComponent<MeshRenderer>().materials = materials;
-                if (VariantShownOnSurvivor.Value == "Panic")
-                    followerPrefab.AddComponent<PrefabSizeScript>();
-                if (VariantShownOnSurvivor.Value != "Panic")
-                    followerPrefab.AddComponent<FakePanicPrefabSizeScript>();
+                followerPrefab.AddComponent<FakePanicPrefabSizeScript>();
                 Vector3 generalScale = new Vector3(.0125f, .0125f, .0125f);
                 rules.AddCharacterModelRule(new ItemDisplayRule
                 {
@@ -476,6 +483,16 @@ namespace Crystal_Burden
                     localAngles = new Vector3(330f, 350f, 180f),
                     localScale = generalScale * 0.8f
                 }, "mdlDeputy"
+                );
+                rules.AddCharacterModelRule(new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "CalfR",
+                    localPos = new Vector3(-0.015f, 0.4f, 0.02f),
+                    localAngles = new Vector3(330f, 350f, 180f),
+                    localScale = generalScale * 0.8f
+                }, "mdlDriver(Clone)"
                 );
             }
         }

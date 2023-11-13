@@ -27,7 +27,7 @@ namespace Crystal_Burden
     [BepInDependency("com.xoxfaby.BetterAPI", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("com.OkIgotIt.Her_Burden", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("com.Maiesen.BodyBlend", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.Kalkune.Crystal_Burden", "Crystal_Burden", "1.5.6")]
+    [BepInPlugin("com.Kalkune.Crystal_Burden", "Crystal_Burden", "1.5.7")]
 
     public class Crystal_Burden : BaseUnityPlugin
     {
@@ -60,6 +60,7 @@ namespace Crystal_Burden
         public static ConfigEntry<bool> Nsfw { get; set; }
         public static ConfigEntry<bool> LuckInverseEffect { get; set; }
         public static ConfigEntry<bool> ParticleTrail { get; set; }
+        public static ConfigEntry<bool> TogglePearlCleanse { get; set; }
         public static ConfigEntry<string> Artist { get; set; }
         public static ConfigEntry<string> VariantShownOnSurvivor { get; set; }
         public static ConfigEntry<float> MaxSize { get; set; }
@@ -81,6 +82,7 @@ namespace Crystal_Burden
             ToggleDebuffs = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Debuffs", true, "Changes if debuffs are applied or not. If false, Burden Variants will change to legendaries and makes them have a chance to drop on kill");
             VariantDropCount = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Variant Drop Count", true, "Changes if all Burden Variants are in the drop list separately or together. If false, Variants will only have one entry into the drop list");
             LuckInverseEffect = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Luck Inverse Effect", true, "Changes if luck is inverted for the \"Toggle Luck Effect\". If true, luck will be inverted");
+            TogglePearlCleanse = Config.Bind<bool>("1. Her Burden Toggle", "Toggle Cleanse into Pearls", false, "Changes if Variants gets cleansed into Pearls rather than the original item.");
             if (HerBurdenInstalled || File.ReadAllText(Paths.ConfigPath + "\\com.Kalkune.Crystal_Burden.cfg").Contains("[0. Her Burden NSFW Toggle]"))
             {
                 Nsfw = Config.Bind<bool>("0. Her Burden NSFW Toggle", "Toggles Her Burden NSFW", true, "Changes if Her Burden is NSFW or SFW. If false, Her Burden will switch to SFW models");
@@ -190,7 +192,10 @@ namespace Crystal_Burden
         public static void CharacterBody_RecalculateStats(Action<CharacterBody> orig, CharacterBody self)
         {
             if (!self?.inventory)
+            {
+                orig(self);
                 return;
+            }
             self.acceleration += (self.inventory.GetItemCount(HerPanic)*4);
             orig(self);
         }
@@ -207,7 +212,7 @@ namespace Crystal_Burden
 
         public static Interactability PurchaseInteraction_GetInteractability(Func<PurchaseInteraction, Interactor, Interactability> orig, PurchaseInteraction self, Interactor activator)
         {
-            if (self.displayNameToken.ToLower() == "shrine_cleanse_name" && CurrentTransformedItem != PickupIndex.none)
+            if (self.displayNameToken.ToLower() == "shrine_cleanse_name" && CurrentTransformedItem != PickupIndex.none && !TogglePearlCleanse.Value)
                     return Interactability.Disabled;
             return orig(self, activator);
         }
@@ -253,7 +258,7 @@ namespace Crystal_Burden
                         num3 += itemCount2;
                         if (num2 < num3)
                         {
-                            if (TransformedList.Count != 0 && ItemCatalog.GetItemDef(itemIndex2).ContainsTag((ItemTag)19))
+                            if (TransformedList.Count != 0 && ItemCatalog.GetItemDef(itemIndex2).ContainsTag((ItemTag)19) && !TogglePearlCleanse.Value)
                             {
                                 int ItemsToRemove;
                                 CurrentTransformedItem = TransformedList[UnityRandom.Range(0, TransformedList.Count)];
@@ -381,10 +386,10 @@ namespace Crystal_Burden
                     TotalDrops++;
                 if (changepickup == true && TotalDrops > 0 && blacklist == false)
                 {
-                    ItemDef itemDef = ItemCatalog.GetItemDef(PickupCatalog.GetPickupDef(self.pickupIndex).itemIndex);
-                    if (itemDef.tier == ItemTier.Tier2 || itemDef.tier == ItemTier.VoidTier2 || itemDef.tier == ItemTier.Boss || itemDef.tier == ItemTier.VoidBoss)
+                    ItemTier itemTier = self.pickupIndex.pickupDef.itemTier;
+                    if (itemTier == ItemTier.Tier2 || itemTier == ItemTier.VoidTier2 || itemTier == ItemTier.Boss || itemTier == ItemTier.VoidBoss)
                         TotalDrops += 1;
-                    else if (itemDef.tier == ItemTier.Tier3 || itemDef.tier == ItemTier.VoidTier3)
+                    else if (itemTier == ItemTier.Tier3 || itemTier == ItemTier.VoidTier3)
                         TotalDrops += 4;
                     if (GiveOriginalItem.Value)
                     {
@@ -416,9 +421,10 @@ namespace Crystal_Burden
                         }
                         orig(ref context);
                         //GenericPickupController.SendPickupMessage(body.master, self.pickupIndex);
-                        CharacterMasterNotificationQueue.PushItemTransformNotification(body.master, PickupCatalog.GetPickupDef(originalItem).itemIndex, itemDef.itemIndex, CharacterMasterNotificationQueue.TransformationType.Suppressed);
+                        CharacterMasterNotificationQueue.PushItemTransformNotification(body.master, PickupCatalog.GetPickupDef(originalItem).itemIndex, self.pickupIndex.pickupDef.itemIndex, CharacterMasterNotificationQueue.TransformationType.Suppressed);
                     }
-                    TransformedList.Add(originalItem);
+                    if (!TogglePearlCleanse.Value)
+                        TransformedList.Add(originalItem);
 
                     //Handle the size change with scripts
                     Size(1, body, false);
@@ -594,7 +600,7 @@ namespace Crystal_Burden
 
         public void Start()
         {
-            if (VariantShownOnSurvivor.Value == "Burden")
+            if (!Nsfw?.Value ?? false == false || VariantShownOnSurvivor.Value == "Burden")
                 VariantOnSurvivor = HerBurden;
             else if (VariantShownOnSurvivor.Value == "Recluse")
                 VariantOnSurvivor = HerRecluse;
