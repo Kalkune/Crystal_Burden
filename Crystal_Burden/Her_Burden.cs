@@ -213,7 +213,7 @@ namespace Crystal_Burden
         public static Interactability PurchaseInteraction_GetInteractability(Func<PurchaseInteraction, Interactor, Interactability> orig, PurchaseInteraction self, Interactor activator)
         {
             if (self.displayNameToken.ToLower() == "shrine_cleanse_name" && CurrentTransformedItem != PickupIndex.none && !TogglePearlCleanse.Value)
-                    return Interactability.Disabled;
+                return Interactability.Disabled;
             return orig(self, activator);
         }
 
@@ -600,7 +600,7 @@ namespace Crystal_Burden
 
         public void Start()
         {
-            if (!Nsfw?.Value ?? false == false || VariantShownOnSurvivor.Value == "Burden")
+            if (VariantShownOnSurvivor.Value == "Burden")
                 VariantOnSurvivor = HerBurden;
             else if (VariantShownOnSurvivor.Value == "Recluse")
                 VariantOnSurvivor = HerRecluse;
