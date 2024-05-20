@@ -27,7 +27,7 @@ namespace Crystal_Burden
     [BepInDependency("com.xoxfaby.BetterAPI", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("com.OkIgotIt.Her_Burden", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("com.Maiesen.BodyBlend", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.Kalkune.Crystal_Burden", "Crystal_Burden", "1.5.7")]
+    [BepInPlugin("com.Kalkune.Crystal_Burden", "Crystal_Burden", "1.5.9")]
 
     public class Crystal_Burden : BaseUnityPlugin
     {
@@ -600,6 +600,11 @@ namespace Crystal_Burden
 
         public void Start()
         {
+            if (!Nsfw?.Value ?? true)
+            {
+                VariantOnSurvivor = HerBurden;
+                return;
+            }
             if (VariantShownOnSurvivor.Value == "Burden")
                 VariantOnSurvivor = HerBurden;
             else if (VariantShownOnSurvivor.Value == "Recluse")
