@@ -1,4 +1,4 @@
-﻿using BetterAPI;
+﻿using R2API;
 using RoR2;
 using System;
 using System.Collections.Generic;
@@ -18,7 +18,9 @@ namespace Crystal_Burden
             HBItemPicker.AutoPopulateTokens();
             HBItemPicker.deprecatedTier = ItemTier.NoTier;
             HBItemPicker.hidden = true;
-            Items.Add(HBItemPicker, null);
+            var rules = new ItemDisplayRuleDict();
+            CustomItem CustomItem = new CustomItem(HBItemPicker, rules);
+            ItemAPI.Add(CustomItem);
         }
     }
 }

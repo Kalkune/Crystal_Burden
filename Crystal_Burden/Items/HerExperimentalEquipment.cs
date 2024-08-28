@@ -1,8 +1,8 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
-using BetterAPI;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using R2API;
 using RoR2;
 using System;
 using System.IO;
@@ -46,7 +46,7 @@ namespace Crystal_Burden
                 HerGambleBuff.iconSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("GambleEquipmentIcon");
             else if (!Nsfw?.Value ?? true)
                 HerGambleBuff.iconSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("Brdn_Crystal_GambleEquipmentIcon");
-            Buffs.Add(HerGambleBuff);
+            ContentAddition.AddBuffDef(HerGambleBuff);
             HerGambleDeBuff = ScriptableObject.CreateInstance<BuffDef>();
             HerGambleDeBuff.name = "HerGambleDeBuff";
             HerGambleDeBuff.isDebuff = true;
@@ -54,31 +54,32 @@ namespace Crystal_Burden
                 HerGambleDeBuff.iconSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("Gamble" + tier + "EquipmentIcon");
             else if (!Nsfw?.Value ?? true)
                 HerGambleDeBuff.iconSprite = Crystal_Burden.bundle.LoadAsset<Sprite>("Brdn_Crystal_Gamble" + tier + "EquipmentIcon");
-            Buffs.Add(HerGambleDeBuff);
-            var rules = new ItemDisplays.CharacterItemDisplayRuleSet();
+            ContentAddition.AddBuffDef(HerGambleDeBuff);
+            var rules = new ItemDisplayRuleDict();
             AddLocation(rules);
-            Equipments.Add(HerGamble, rules);
+            CustomEquipment CustomEquipment = new CustomEquipment(HerGamble, rules);
+            ItemAPI.Add(CustomEquipment);
         }
         private static void AddTokens()
         {
             if (Nsfw?.Value ?? false)
-                Languages.AddTokenString("HERGAMBLE_NAME", "Her Gamble");
+                LanguageAPI.Add("HERGAMBLE_NAME", "Her Gamble");
             else if (!Nsfw?.Value ?? true)
-                Languages.AddTokenString("HERGAMBLE_NAME", "Crystal Gamble");
+                LanguageAPI.Add("HERGAMBLE_NAME", "Crystal Gamble");
             if (ToggleDebuffs.Value)
             {
-                Languages.AddTokenString("HERGAMBLE_PICKUP", "An equipment that gambles your stats");
-                Languages.AddTokenString("HERGAMBLE_DESC", "An equipment that gambles your stats that come from <color=#307FFF>" + NameToken + "</color> Variants");
+                LanguageAPI.Add("HERGAMBLE_PICKUP", "An equipment that gambles your stats");
+                LanguageAPI.Add("HERGAMBLE_DESC", "An equipment that gambles your stats that come from <color=#307FFF>" + NameToken + "</color> Variants");
             }
             if (!ToggleDebuffs.Value)
             {
-                Languages.AddTokenString("HERGAMBLE_PICKUP", "Has a chance to double your stats");
-                Languages.AddTokenString("HERGAMBLE_DESC", "Has a chance to double your stats that come from <color=#e7553b>" + NameToken + "</color> Variants");
+                LanguageAPI.Add("HERGAMBLE_PICKUP", "Has a chance to double your stats");
+                LanguageAPI.Add("HERGAMBLE_DESC", "Has a chance to double your stats that come from <color=#e7553b>" + NameToken + "</color> Variants");
             }
-            Languages.AddTokenString("HERGAMBLE_LORE", "<style=cMono>//--AUTO-TRANSCRIPTION FROM [file unavailable] --//</style>\n\n...then I have something for you, now that you have found pleasure.\n\nHere. Take it in your hand, feel its [TRANSCRIPTION ERROR]. Observe how its texture changes.\n\nNow bring it within you. Do not worry.\n\nDo not activate it yet. Allow it to [observe]. Feel your [pleasure] empower it.\n\nDo not worry. If ever you wish to be pleased...");
+            LanguageAPI.Add("HERGAMBLE_LORE", "<style=cMono>//--AUTO-TRANSCRIPTION FROM [file unavailable] --//</style>\n\n...then I have something for you, now that you have found pleasure.\n\nHere. Take it in your hand, feel its [TRANSCRIPTION ERROR]. Observe how its texture changes.\n\nNow bring it within you. Do not worry.\n\nDo not activate it yet. Allow it to [observe]. Feel your [pleasure] empower it.\n\nDo not worry. If ever you wish to be pleased...");
 
         }
-        public static void AddLocation(ItemDisplays.CharacterItemDisplayRuleSet rules)
+        public static void AddLocation(ItemDisplayRuleDict rules)
         {
             if (!ItemVisibility.Value && (Nsfw?.Value ?? false))
             {
@@ -118,7 +119,7 @@ namespace Crystal_Burden
             {
                 GameObject followerPrefab = Crystal_Burden.bundle.LoadAsset<GameObject>("her_gamble");
                 Vector3 generalScale = new Vector3(.0125f, .0125f, .0125f);
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                rules.Add("mdlCommandoDualies", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -126,9 +127,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0f, 0f, 0.1f),
                     localAngles = new Vector3(40f, 180f, 180f),
                     localScale = generalScale
-                }, "mdlCommandoDualies"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlHuntress", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -136,9 +137,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(-0.025f, 0.025f, 0.1875f),
                     localAngles = new Vector3(40f, 150f, 180f),
                     localScale = generalScale
-                }, "mdlHuntress"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlToolbot", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -146,9 +147,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0.15f, 0.5f, 0.8f),
                     localAngles = new Vector3(45f, -170f, -170f),
                     localScale = generalScale * 10
-                }, "mdlToolbot"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlEngi", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -156,9 +157,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0.15f, 0.04f, -0.16f),
                     localAngles = new Vector3(35f, -25f, 180f),
                     localScale = generalScale
-                }, "mdlEngi"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlMage", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -166,9 +167,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(-0.025f, 0.325f, 0.17f),
                     localAngles = new Vector3(60f, 165f, 175f),
                     localScale = generalScale
-                }, "mdlMage"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlMerc", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -176,9 +177,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0.06f, 0.03f, 0.16f),
                     localAngles = new Vector3(40f, 155f, 180f),
                     localScale = generalScale
-                }, "mdlMerc"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlTreebot", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -186,9 +187,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(-0.27f, 0.4f, 0.3f),
                     localAngles = new Vector3(30f, 80f, 10f),
                     localScale = generalScale * 2
-                }, "mdlTreebot"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlLoader", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -196,9 +197,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0.2025f, 0.2f, 0.467f),
                     localAngles = new Vector3(-46.5f, 180f, 0f),
                     localScale = generalScale
-                }, "mdlLoader"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlCroco", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -206,9 +207,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0f, 1.5f, 1.35f),
                     localAngles = new Vector3(45f, -10f, 175f),
                     localScale = generalScale * 10
-                }, "mdlCroco"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlCaptain", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -216,9 +217,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(-0.01f, 0.32f, 0.15f),
                     localAngles = new Vector3(55f, 160f, 170f),
                     localScale = generalScale
-                }, "mdlCaptain"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlBandit2", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -226,9 +227,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0f, 0.225f, 0.115f),
                     localAngles = new Vector3(50f, 150f, 170f),
                     localScale = generalScale
-                }, "mdlBandit2"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlHeretic", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -236,9 +237,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(-0.15f, 0.2f, 0.13f),
                     localAngles = new Vector3(40f, 130f, 60f),
                     localScale = generalScale * 2
-                }, "mdlHeretic"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlRailGunner", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -246,9 +247,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(-0.015f, -0.02f, 0.11f),
                     localAngles = new Vector3(47.5f, 170f, 180f),
                     localScale = generalScale
-                }, "mdlRailGunner"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlVoidSurvivor", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -256,9 +257,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(-0.05f, 0.1f, -0.115f),
                     localAngles = new Vector3(40f, 10f, 180f),
                     localScale = generalScale
-                }, "mdlVoidSurvivor"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlMEL-T2", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -266,9 +267,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0.15f, 0.5f, 0.8f),
                     localAngles = new Vector3(45f, -170f, -170f),
                     localScale = generalScale * 0.25f
-                }, "mdlMEL-T2"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlPaladin", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -276,9 +277,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0.055f, 0.1f, -0.325f),
                     localAngles = new Vector3(37.5f, 32.5f, 155f),
                     localScale = generalScale
-                }, "mdlPaladin"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlDeputy", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -286,9 +287,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(-0.1f, 0.225f, 0.05f),
                     localAngles = new Vector3(40f, 150f, 180f),
                     localScale = generalScale * 0.8f
-                }, "mdlDeputy"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlDriver(Clone)", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -296,8 +297,18 @@ namespace Crystal_Burden
                     localPos = new Vector3(-0.06f, 0.055f, 0.08f),
                     localAngles = new Vector3(40f, 150f, 180f),
                     localScale = generalScale * 0.8f
-                }, "mdlDriver(Clone)"
-                );
+                },
+                });
+                rules.Add("mdlHouse(Clone)", new ItemDisplayRule[] { new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "RightThigh",
+                    localPos = new Vector3(0.05f, 0.1f, -0.18f),
+                    localAngles = new Vector3(45f, 300f, 175f),
+                    localScale = generalScale * 0.8f
+                },
+                });
             }
             if (ItemVisibility.Value && (!Nsfw?.Value ?? true))
             {
@@ -312,7 +323,7 @@ namespace Crystal_Burden
                 materials[3].CopyPropertiesFromMaterial(what2);
                 followerPrefab.GetComponent<MeshRenderer>().materials = materials;
                 Vector3 generalScale = new Vector3(.0125f, .0125f, .0125f);
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                rules.Add("mdlCommandoDualies", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -320,9 +331,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0f, 0.175f, 0f),
                     localAngles = new Vector3(0f, 0f, 0f),
                     localScale = generalScale
-                }, "mdlCommandoDualies"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlHuntress", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -330,9 +341,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0f, 0.1f, 0f),
                     localAngles = new Vector3(0f, 0f, 0f),
                     localScale = generalScale
-                }, "mdlHuntress"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlToolbot", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -340,9 +351,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0f, 1.5f, 0f),
                     localAngles = new Vector3(0f, 0f, 0f),
                     localScale = generalScale * 10
-                }, "mdlToolbot"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlEngi", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -350,9 +361,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0f, 0.25f, 0f),
                     localAngles = new Vector3(0f, 0f, 0f),
                     localScale = generalScale
-                }, "mdlEngi"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlMage", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -360,9 +371,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0f, 0.1f, 0f),
                     localAngles = new Vector3(0f, 0f, 0f),
                     localScale = generalScale
-                }, "mdlMage"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlMerc", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -370,9 +381,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0f, 0.15f, 0f),
                     localAngles = new Vector3(0f, 0f, 0f),
                     localScale = generalScale
-                }, "mdlMerc"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlTreebot", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -380,9 +391,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0f, 0.4f, 0f),
                     localAngles = new Vector3(0f, 0f, 0f),
                     localScale = generalScale * 2
-                }, "mdlTreebot"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlLoader", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -390,9 +401,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0f, 0.175f, 0f),
                     localAngles = new Vector3(0f, 0f, 0f),
                     localScale = generalScale
-                }, "mdlLoader"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlCroco", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -400,9 +411,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0f, 0f, 0f),
                     localAngles = new Vector3(0f, 0f, 0f),
                     localScale = generalScale * 10
-                }, "mdlCroco"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlCaptain", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -410,9 +421,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0f, 0.2f, 0f),
                     localAngles = new Vector3(0f, 0f, 0f),
                     localScale = generalScale
-                }, "mdlCaptain"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlBandit2", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -420,9 +431,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0f, 0.175f, 0f),
                     localAngles = new Vector3(0f, 0f, 0f),
                     localScale = generalScale
-                }, "mdlBandit2"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlHeretic", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -430,9 +441,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(-0.2f, 0f, 0f),
                     localAngles = new Vector3(90f, 0f, 0f),
                     localScale = generalScale * 2
-                }, "mdlHeretic"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlRailGunner", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -440,9 +451,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0f, 0.075f, 0f),
                     localAngles = new Vector3(0f, 0f, 0f),
                     localScale = generalScale
-                }, "mdlRailGunner"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlVoidSurvivor", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -450,9 +461,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0f, 0.075f, 0f),
                     localAngles = new Vector3(0f, 0f, 0f),
                     localScale = generalScale
-                }, "mdlVoidSurvivor"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlMEL-T2", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -460,9 +471,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0f, 0.03f, 0f),
                     localAngles = new Vector3(0f, 0f, 0f),
                     localScale = generalScale * 0.25f
-                }, "mdlMEL-T2"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlPaladin", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -470,9 +481,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0f, 0.15f, 0.1f),
                     localAngles = new Vector3(0f, 0f, 0f),
                     localScale = generalScale * 2f
-                }, "mdlPaladin"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlDeputy", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -480,9 +491,9 @@ namespace Crystal_Burden
                     localPos = new Vector3(0f, 0.1f, 0.05f),
                     localAngles = new Vector3(0f, 0f, 0f),
                     localScale = generalScale * 0.8f
-                }, "mdlDeputy"
-                );
-                rules.AddCharacterModelRule(new ItemDisplayRule
+                },
+                });
+                rules.Add("mdlDriver(Clone)", new ItemDisplayRule[] { new ItemDisplayRule
                 {
                     ruleType = ItemDisplayRuleType.ParentedPrefab,
                     followerPrefab = followerPrefab,
@@ -490,8 +501,18 @@ namespace Crystal_Burden
                     localPos = new Vector3(0f, 0.175f, 0.05f),
                     localAngles = new Vector3(0f, 0f, 0f),
                     localScale = generalScale * 0.8f
-                }, "mdlDriver(Clone)"
-                );
+                },
+                });
+                rules.Add("mdlHouse(Clone)", new ItemDisplayRule[] { new ItemDisplayRule
+                {
+                    ruleType = ItemDisplayRuleType.ParentedPrefab,
+                    followerPrefab = followerPrefab,
+                    childName = "Chest",
+                    localPos = new Vector3(0f, 0f, 0f),
+                    localAngles = new Vector3(0f, 0f, 0f),
+                    localScale = generalScale * 0.8f
+                },
+                });
             }
         }
     }
