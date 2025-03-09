@@ -30,7 +30,7 @@ namespace Crystal_Burden
     [BepInDependency("com.bepis.r2api.language", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("com.OkIgotIt.Her_Burden", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("com.Maiesen.BodyBlend", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.Kalkune.Crystal_Burden", "Crystal_Burden", "1.5.10")]
+    [BepInPlugin("com.Kalkune.Crystal_Burden", "Crystal_Burden", "1.5.11")]
 
     public class Crystal_Burden : BaseUnityPlugin
     {
@@ -173,14 +173,14 @@ namespace Crystal_Burden
                     }
                 }
             };
-
+            
             WhoKnows();
             Hook CharacterBodyUpdate = new Hook(typeof(CharacterBody).GetMethod("Update", BindingFlags.Public | BindingFlags.Instance), typeof(Crystal_Burden).GetMethod("CharacterBody_Update"));
             Hook CharacterMasterOnBodyStart = new Hook(typeof(CharacterMaster).GetMethod("OnBodyStart", BindingFlags.Public | BindingFlags.Instance), typeof(Crystal_Burden).GetMethod("CharacterMaster_OnBodyStart"));
             Hook DuplicatingOnEnter = new Hook(typeof(EntityStates.Duplicator.Duplicating).GetMethod("OnEnter", BindingFlags.Public | BindingFlags.Instance), typeof(Crystal_Burden).GetMethod("Duplicating_OnEnter"));
             Hook EquipmentSlotPerformEquipmentAction = new Hook(typeof(EquipmentSlot).GetMethod("PerformEquipmentAction", BindingFlags.NonPublic | BindingFlags.Instance), typeof(Crystal_Burden).GetMethod("EquipmentSlot_PerformEquipmentAction"));
             GlobalEventManager.onCharacterDeathGlobal += GlobalEventManager_onCharacterDeathGlobal;
-            Hook PickupDropletControllerCreatePickupDroplet_CreatePickupInfo_Vector3_Vector3 = new Hook(typeof(PickupDropletController).GetMethod("CreatePickupDroplet", new Type[] { typeof(PickupIndex), typeof(Vector3), typeof(Vector3) }), typeof(Crystal_Burden).GetMethod("PickupDropletController_CreatePickupDroplet_CreatePickupInfo_Vector3_Vector3"));
+            Hook PickupDropletControllerCreatePickupDroplet_CreatePickupInfo_Vector3_Vector3 = new Hook(typeof(PickupDropletController).GetMethod("CreatePickupDroplet", new Type[] { typeof(GenericPickupController.CreatePickupInfo), typeof(Vector3), typeof(Vector3) }), typeof(Crystal_Burden).GetMethod("PickupDropletController_CreatePickupDroplet_CreatePickupInfo_Vector3_Vector3"));
             Hook CharacterMasterRespawnExtraLife = new Hook(typeof(CharacterMaster).GetMethod("RespawnExtraLife", BindingFlags.Public | BindingFlags.Instance), typeof(Crystal_Burden).GetMethod("CharacterMaster_RespawnExtraLife"));
             Hook PickupPickerControllerSetOptionsFromPickupForCommandArtifact = new Hook(typeof(PickupPickerController).GetMethod("SetOptionsFromPickupForCommandArtifact", BindingFlags.Public | BindingFlags.Instance), typeof(Crystal_Burden).GetMethod("PickupPickerController_SetOptionsFromPickupForCommandArtifact"));
             Hook InventoryGiveItem_ItemIndex_int = new Hook(typeof(Inventory).GetMethod("GiveItem", new Type[] { typeof(ItemIndex), typeof(int) }), typeof(Crystal_Burden).GetMethod("Inventory_GiveItem_ItemIndex_int"));
@@ -641,20 +641,20 @@ namespace Crystal_Burden
             }
         }
 
-        public static void PickupDropletController_CreatePickupDroplet_CreatePickupInfo_Vector3_Vector3(Action<PickupIndex, Vector3, Vector3> orig, PickupIndex pickupInfo, Vector3 position, Vector3 velocity)
+        public static void PickupDropletController_CreatePickupDroplet_CreatePickupInfo_Vector3_Vector3(Action<GenericPickupController.CreatePickupInfo, Vector3, Vector3> orig, GenericPickupController.CreatePickupInfo pickupInfo, Vector3 position, Vector3 velocity)
         {
-            if (RunArtifactManager.instance.IsArtifactEnabled(HerCurse) && PickupCatalog.GetPickupDef(pickupInfo).equipmentIndex != EquipmentIndex.None && pickupInfo != PickupCatalog.FindPickupIndex(HerGamble.equipmentIndex))
+            if (RunArtifactManager.instance.IsArtifactEnabled(HerCurse) && PickupCatalog.GetPickupDef(pickupInfo.pickupIndex).equipmentIndex != EquipmentIndex.None && pickupInfo.pickupIndex != PickupCatalog.FindPickupIndex(HerGamble.equipmentIndex))
             {
                 PickupDropletController.CreatePickupDroplet(PickupCatalog.FindPickupIndex(HerGamble.equipmentIndex), position, velocity);
                 return;
             }
             bool burdenvariant = false;
-            if (PickupCatalog.GetPickupDef(pickupInfo).itemIndex != ItemIndex.None && ItemCatalog.GetItemDef(PickupCatalog.GetPickupDef(pickupInfo).itemIndex).ContainsTag((ItemTag)19))
+            if (PickupCatalog.GetPickupDef(pickupInfo.pickupIndex).itemIndex != ItemIndex.None && ItemCatalog.GetItemDef(PickupCatalog.GetPickupDef(pickupInfo.pickupIndex).itemIndex).ContainsTag((ItemTag)19))
                 burdenvariant = true;
             bool blacklist = false;
-            if (pickupInfo == PickupCatalog.FindPickupIndex(RoR2Content.Items.ArtifactKey.itemIndex) || pickupInfo == PickupCatalog.FindPickupIndex(RoR2Content.Items.LunarTrinket.itemIndex))
+            if (pickupInfo.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.ArtifactKey.itemIndex) || pickupInfo.pickupIndex == PickupCatalog.FindPickupIndex(RoR2Content.Items.LunarTrinket.itemIndex))
                 blacklist = true;
-            if (RunArtifactManager.instance.IsArtifactEnabled(HerCurse) && PickupCatalog.GetPickupDef(pickupInfo).itemIndex != ItemIndex.None && !burdenvariant && VariantDropCount.Value && !blacklist)
+            if (RunArtifactManager.instance.IsArtifactEnabled(HerCurse) && PickupCatalog.GetPickupDef(pickupInfo.pickupIndex).itemIndex != ItemIndex.None && !burdenvariant && VariantDropCount.Value && !blacklist)
             {
                 switch (Mathf.FloorToInt(UnityRandom.Range(0, 6)))
                 {
@@ -679,12 +679,12 @@ namespace Crystal_Burden
                 }
                 return;
             }
-            if (RunArtifactManager.instance.IsArtifactEnabled(HerCurse) && PickupCatalog.GetPickupDef(pickupInfo).itemIndex != ItemIndex.None && !burdenvariant && !VariantDropCount.Value && !blacklist)
+            if (RunArtifactManager.instance.IsArtifactEnabled(HerCurse) && PickupCatalog.GetPickupDef(pickupInfo.pickupIndex).itemIndex != ItemIndex.None && !burdenvariant && !VariantDropCount.Value && !blacklist)
             {
                 PickupDropletController.CreatePickupDroplet(PickupCatalog.FindPickupIndex(HerBurden.itemIndex), position, velocity);
                 return;
             }
-            if (pickupInfo == PickupCatalog.FindPickupIndex(HerBurden.itemIndex) && !VariantDropCount.Value)
+            if (pickupInfo.pickupIndex == PickupCatalog.FindPickupIndex(HerBurden.itemIndex) && !VariantDropCount.Value)
             {
                 switch (Mathf.FloorToInt(UnityRandom.Range(0, 6)))
                 {
@@ -1405,13 +1405,17 @@ namespace Crystal_Burden
         {
             EquipmentDef[] equipmentDefs = new EquipmentDef[] { Crystal_Burden.HerGamble };
             ArtifactDef[] artifactDefs = new ArtifactDef[] { Crystal_Burden.HerCurse };
+            ItemDef[] itemDefs = new ItemDef[] { Crystal_Burden.HerBurden, Crystal_Burden.HerRecluse, Crystal_Burden.HerFury, Crystal_Burden.HerTorpor, Crystal_Burden.HerRancor, Crystal_Burden.HerPanic, Crystal_Burden.HBItemPicker };
+            BuffDef[] buffDefs = new BuffDef[] { Crystal_Burden.HerGambleBuff, Crystal_Burden.HerGambleDeBuff };
             contentPack.identifier = identifier;
             contentPack.equipmentDefs.Add(equipmentDefs);
             contentPack.artifactDefs.Add(artifactDefs);
+            contentPack.itemDefs.Add(itemDefs);
+            contentPack.buffDefs.Add(buffDefs);
             args.ReportProgress(1f);
             yield break;
         }
-
+        
         public IEnumerator GenerateContentPackAsync(GetContentPackAsyncArgs args)
         {
             ContentPack.Copy(contentPack, args.output);
